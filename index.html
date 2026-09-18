@@ -32,12 +32,12 @@
   <main>
     <aside class="panel">
       <h2>素材与模板</h2>
-      <div class="field"><label>设计素材图</label><input id="art" type="file" accept="image/*"><small>上传设计稿。默认使用“参考图2”。</small></div>
-      <div class="field"><label>壳体底图</label><input id="base" type="file" accept="image/*"><small>默认：素材底图.png</small></div>
-      <div class="field"><label>壳体蒙版</label><input id="mask" type="file" accept="image/*"><small>默认：素材图片蒙版.png</small></div>
-      <div class="field"><label>纸感噪声</label><input id="noise" type="file" accept="image/*"><small>默认：素材图片噪声.png</small></div>
-      <div class="field"><label>展示背景</label><input id="bg" type="file" accept="image/*"><small>默认：背景图.png</small></div>
-      <div class="field"><label>侧面壳体</label><input id="side" type="file" accept="image/*"><small>默认：素材底图2.png</small></div>
+      <div class="field"><label>设计素材图</label><input id="art" type="file" accept="image/*"></div>
+      <div class="field"><label>壳体底图</label><input id="base" type="file" accept="image/*"></div>
+      <div class="field"><label>壳体蒙版</label><input id="mask" type="file" accept="image/*"></div>
+      <div class="field"><label>纸感噪声</label><input id="noise" type="file" accept="image/*"></div>
+      <div class="field"><label>展示背景</label><input id="bg" type="file" accept="image/*"></div>
+      <div class="field"><label>侧面壳体</label><input id="side" type="file" accept="image/*"></div>
       <div class="field"><label>素材缩放</label><input id="scale" type="range" min="85" max="125" value="100"><div class="range-row"><span>85%</span><span id="scaleText">100%</span><span>125%</span></div></div>
       <div class="field"><label>素材上下位置</label><input id="offset" type="range" min="-12" max="12" value="0"><div class="range-row"><span>上移</span><span id="offsetText">0%</span><span>下移</span></div></div>
       <div class="field"><label>纸感强度</label><input id="grain" type="range" min="0" max="55" value="18"><div class="range-row"><span>平滑</span><span id="grainText">18%</span><span>颗粒</span></div></div>
@@ -140,7 +140,7 @@
     $('render').onclick=drawAll;$('reset').onclick=init;
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
     $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
-    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=6'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=7'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
