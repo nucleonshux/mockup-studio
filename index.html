@@ -48,11 +48,12 @@
       <article class="result"><div class="result-head"><h3>02 · 白底产品图</h3><button class="download" data-out="white">下载</button></div><canvas id="white" width="1000" height="1000"></canvas></article>
       <article class="result"><div class="result-head"><h3>03 · 背景展示图</h3><button class="download" data-out="scene">下载</button></div><canvas id="scene" width="1000" height="1000"></canvas></article>
       <article class="result"><div class="result-head"><h3>04 · 正侧组合图</h3><button class="download" data-out="combo">下载</button></div><canvas id="combo" width="1000" height="1000"></canvas></article>
+      <article class="result wide"><div class="result-head"><h3>05 · 详情图</h3><button class="download" data-out="detail">下载</button></div><canvas id="detail" width="1200" height="5615" style="aspect-ratio:1200/5615"></canvas></article>
     </section>
   </main>
   <script>
     const $ = id => document.getElementById(id), assets = {};
-    const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'shadow.png',bg:'背景图.png',side:'素材底图2.png'};
+    const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'shadow.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png'};
     const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('素材无法加载：'+src)); i.src=src; });
     const fit = (ctx,img,x,y,w,h,cover=true) => { const r=cover?Math.max(w/img.width,h/img.height):Math.min(w/img.width,h/img.height); const nw=img.width*r,nh=img.height*r; ctx.drawImage(img,x+(w-nw)/2,y+(h-nh)/2,nw,nh); };
     // The supplied mask uses solid black pixels for lens holes (rather than transparent pixels).
@@ -100,7 +101,7 @@
     function deviceShadow(ctx,size,opacity=.22,offsetY=Math.round(size*.032),x=0,y=0){ const s=silhouette(size);ctx.save();ctx.globalAlpha=opacity;ctx.shadowColor='rgba(18,38,58,1)';ctx.shadowBlur=size*.045;ctx.drawImage(s,x,y+offsetY,size,size);ctx.restore(); }
     function drawTo(id, painter){const c=$(id),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);painter(x,c.width,c.height);}
     function paintScaled(ctx,w,h,paint){ const scale=+$('overall').value/100;ctx.save();ctx.translate(w/2,h/2);ctx.scale(scale,scale);ctx.translate(-w/2,-h/2);paint();ctx.restore(); }
-    function drawAll(){ if(Object.keys(assets).length<7)return; const dev=makeDevice(1000);
+    function drawAll(){ if(Object.keys(assets).length<8)return; const dev=makeDevice(1000);
       // 真实效果图：保留壳体/贴图/光影渲染，但不铺背景，导出为透明底 PNG
       drawTo('mockup',(x,w,h)=>{paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
       // Full-size placement matches the supplied 2000px reference compositions.
@@ -114,13 +115,15 @@
         x.drawImage(assets.side, 464,206,148,1624, 236,104,75,820);
         x.drawImage(dev,101,23,967,967);
       })});
+      // 05 详情图：详情底图(1200x5615) + 正侧组合图按参考图6位置(216,2207,800x800)叠放
+      drawTo('detail',(x,w,h)=>{ x.drawImage(assets.detailBg,0,0,w,h); x.drawImage($('combo'),216,2207,800,800); });
       $('status').textContent='已生成 · 可直接下载 PNG';
     }
     ['art','base','mask','noise','bg','side'].forEach(k=>$(k).addEventListener('change',e=>e.target.files[0]&&setFile(k,e.target.files[0])));
     ['scale','offset','grain','overall'].forEach(k=>$(k).addEventListener('input',()=>{$(k+'Text').textContent=$(k).value+'%';drawAll()}));
     $('render').onclick=drawAll;$('reset').onclick=init;
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
-    $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
+    $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
     async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v='+Date.now()); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
