@@ -42,6 +42,7 @@
       <div class="field"><label>素材上下位置</label><input id="offset" type="range" min="-12" max="12" value="0"><div class="range-row"><span>上移</span><span id="offsetText">0%</span><span>下移</span></div></div>
       <div class="field"><label>纸感强度</label><input id="grain" type="range" min="0" max="55" value="18"><div class="range-row"><span>平滑</span><span id="grainText">18%</span><span>颗粒</span></div></div>
       <div class="field"><label>整体缩放</label><input id="overall" type="range" min="70" max="100" value="93"><div class="range-row"><span>70%</span><span id="overallText">93%</span><span>100%</span></div></div>
+      <div class="field"><label>背景图缩放</label><input id="bgScale" type="range" min="50" max="200" value="100"><div class="range-row"><span>50%</span><span id="bgScaleText">100%</span><span>200%</span></div></div>
       <button id="render">生成全部效果图</button><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button id="zipAll" class="secondary">打包下载 ZIP</button><button class="secondary" id="reset">恢复默认素材</button>
       <div class="tips">提示：设计稿会按壳体印刷区等比“铺满”（超出短边自动裁切），图案只会出现在蒙版白色区域。壳体、蒙版与噪声需使用同一模板尺寸。</div>
     </aside>
@@ -59,6 +60,7 @@
     const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'shadow.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png'};
     const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('素材无法加载：'+src)); i.src=src; });
     const fit = (ctx,img,x,y,w,h,cover=true) => { const r=cover?Math.max(w/img.width,h/img.height):Math.min(w/img.width,h/img.height); const nw=img.width*r,nh=img.height*r; ctx.drawImage(img,x+(w-nw)/2,y+(h-nh)/2,nw,nh); };
+    const drawBg=(x,w,h)=>{ const img=assets.bg, bs=+$('bgScale').value/100, r=Math.max(w/img.width,h/img.height)*bs, nw=img.width*r, nh=img.height*r; x.drawImage(img,(w-nw)/2,(h-nh)/2,nw,nh); };
     // The supplied mask uses solid black pixels for lens holes (rather than transparent pixels).
     // Convert its luminance to alpha: white = printable, black = a genuine cut-out.
     function maskByLightness(size){
@@ -109,12 +111,12 @@
       drawTo('mockup',(x,w,h)=>{paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
       // Full-size placement matches the supplied 2000px reference compositions.
       drawTo('white',(x,w,h)=>{x.fillStyle='#fff';x.fillRect(0,0,w,h);paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
-      drawTo('scene',(x,w,h)=>{fit(x,assets.bg,0,0,w,h,true);paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
+      drawTo('scene',(x,w,h)=>{drawBg(x,w,h);paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
       // 正侧组合图（参考图4 版式，1000px 画布）：左侧边条 + 右侧正面，等高并排。
       // 素材底图2.png 为 2000px，侧边壳体在源图 x464..612、y206..1830（其余透明）。
       // 侧边壳 y104..934（高830）；正面壳缩到 956 后 y104..934，与侧边上下对齐。
       // dev(1000) 内正面壳 y84..952；缩放 830/868≈0.956，画 956x956 于(104,24)。
-      drawTo('combo',(x,w,h)=>{fit(x,assets.bg,0,0,w,h,true);paintScaled(x,w,h,()=>{
+      drawTo('combo',(x,w,h)=>{drawBg(x,w,h);paintScaled(x,w,h,()=>{
         x.drawImage(assets.side, 464,206,148,1624, 236,104,75,820);
         x.drawImage(dev,101,23,967,967);
       })});
@@ -126,7 +128,7 @@
       $('status').textContent='已生成 · 可直接下载 PNG';
     }
     ['art','base','mask','noise','bg','side'].forEach(k=>$(k).addEventListener('change',e=>e.target.files[0]&&setFile(k,e.target.files[0])));
-    ['scale','offset','grain','overall'].forEach(k=>$(k).addEventListener('input',()=>{$(k+'Text').textContent=$(k).value+'%';drawAll()}));
+    ['scale','offset','grain','overall','bgScale'].forEach(k=>$(k).addEventListener('input',()=>{$(k+'Text').textContent=$(k).value+'%';drawAll()}));
     $('zipAll').onclick = async () => {
       const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']];
       const zip = new JSZip();
@@ -138,7 +140,7 @@
     $('render').onclick=drawAll;$('reset').onclick=init;
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
     $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
-    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=5'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=6'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
