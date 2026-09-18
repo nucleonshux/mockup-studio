@@ -116,7 +116,9 @@
         x.drawImage(dev,101,23,967,967);
       })});
       // 05 详情图：详情底图(1200x5615) + 正侧组合图按参考图6位置(216,2207,800x800)叠放
-      drawTo('detail',(x,w,h)=>{ x.drawImage(assets.detailBg,0,0,w,h); x.drawImage($('combo'),216,2207,800,800); });
+      drawTo('detail',(x,w,h)=>{ x.drawImage(assets.detailBg,0,0,w,h);
+        x.drawImage(assets.side, 464,206,148,1624, 405,2290,60,656);
+        x.drawImage(dev, 297,2225,774,774); });
       $('status').textContent='已生成 · 可直接下载 PNG';
     }
     ['art','base','mask','noise','bg','side'].forEach(k=>$(k).addEventListener('change',e=>e.target.files[0]&&setFile(k,e.target.files[0])));
