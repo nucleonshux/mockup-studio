@@ -102,17 +102,16 @@
     function paintScaled(ctx,w,h,paint){ const scale=+$('overall').value/100;ctx.save();ctx.translate(w/2,h/2);ctx.scale(scale,scale);ctx.translate(-w/2,-h/2);paint();ctx.restore(); }
     function drawAll(){ if(Object.keys(assets).length<7)return; const dev=makeDevice(1000);
       // 真实效果图：保留壳体/贴图/光影渲染，但不铺背景，导出为透明底 PNG
-      drawTo('mockup',(x,w,h)=>{paintScaled(x,w,h,()=>{deviceShadow(x,w,.22);x.drawImage(dev,0,0,w,h)})});
+      drawTo('mockup',(x,w,h)=>{paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
       // Full-size placement matches the supplied 2000px reference compositions.
-      drawTo('white',(x,w,h)=>{x.fillStyle='#fff';x.fillRect(0,0,w,h);paintScaled(x,w,h,()=>{deviceShadow(x,w,.22);x.drawImage(dev,0,0,w,h)})});
-      drawTo('scene',(x,w,h)=>{fit(x,assets.bg,0,0,w,h,true);paintScaled(x,w,h,()=>{deviceShadow(x,w,.22);x.drawImage(dev,0,0,w,h)})});
+      drawTo('white',(x,w,h)=>{x.fillStyle='#fff';x.fillRect(0,0,w,h);paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
+      drawTo('scene',(x,w,h)=>{fit(x,assets.bg,0,0,w,h,true);paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
       // 正侧组合图（参考图4 版式，1000px 画布）：左侧边条 + 右侧正面，等高并排。
       // 素材底图2.png 为 2000px，侧边壳体在源图 x470..614、y206..1820（其余透明）。
       // 侧边壳 y104..934（高830）；正面壳缩到 956 后 y104..934，与侧边上下对齐。
       // dev(1000) 内正面壳 y84..952；缩放 830/868≈0.956，画 956x956 于(104,24)。
       drawTo('combo',(x,w,h)=>{fit(x,assets.bg,0,0,w,h,true);paintScaled(x,w,h,()=>{
         x.drawImage(assets.side, 470,206,144,1614, 236,104,72,820);
-        deviceShadow(x,967,.22,undefined,101,23);
         x.drawImage(dev,101,23,967,967);
       })});
       $('status').textContent='已生成 · 可直接下载 PNG';
