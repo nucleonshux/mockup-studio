@@ -97,7 +97,7 @@
       return c;
     }
     function shadow(ctx,x,y,w,h,a=.22){ctx.save();ctx.fillStyle=`rgba(15,30,45,${a})`;ctx.filter='blur('+Math.round(w*.045)+'px)';ctx.beginPath();ctx.roundRect(x+w*.1,y+h*.09,w*.8,h*.85,w*.1);ctx.fill();ctx.restore();}
-    function deviceShadow(ctx,size,opacity=.22,offsetY=25,x=0,y=0){ const s=silhouette(size);ctx.save();ctx.globalAlpha=opacity;ctx.filter='blur(34px)';ctx.drawImage(s,x,y+offsetY,size,size);ctx.restore(); }
+    function deviceShadow(ctx,size,opacity=.22,offsetY=25,x=0,y=0){ const s=silhouette(size);ctx.save();ctx.globalAlpha=opacity;ctx.shadowColor='rgba(18,38,58,1)';ctx.shadowBlur=38;ctx.drawImage(s,x,y+offsetY,size,size);ctx.restore(); }
     function drawTo(id, painter){const c=$(id),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);painter(x,c.width,c.height);}
     function paintScaled(ctx,w,h,paint){ const scale=+$('overall').value/100;ctx.save();ctx.translate(w/2,h/2);ctx.scale(scale,scale);ctx.translate(-w/2,-h/2);paint();ctx.restore(); }
     function drawAll(){ if(Object.keys(assets).length<7)return; const dev=makeDevice(1000);
