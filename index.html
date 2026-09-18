@@ -77,7 +77,7 @@
       x.drawImage(assets.art,area.x+(area.w-w)/2,area.y+(area.h-h)/2+shift,w,h); return c;
     }
     function makeDevice(size=1000){
-      const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');
+      const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
       // The design stays 100% opaque; black lens holes and exterior transparency are cut away by the mask.
       const alphaMask=maskByLightness(size), masked=document.createElement('canvas');masked.width=masked.height=size;const m=masked.getContext('2d');m.drawImage(artLayer(size),0,0);m.globalCompositeOperation='destination-in';m.drawImage(alphaMask,0,0);
       x.drawImage(assets.base,0,0,size,size); x.drawImage(masked,0,0);
@@ -100,7 +100,7 @@
     }
     function shadow(ctx,x,y,w,h,a=.22){ctx.save();ctx.fillStyle=`rgba(15,30,45,${a})`;ctx.filter='blur('+Math.round(w*.045)+'px)';ctx.beginPath();ctx.roundRect(x+w*.1,y+h*.09,w*.8,h*.85,w*.1);ctx.fill();ctx.restore();}
     function deviceShadow(ctx,size,opacity=.22,offsetY=Math.round(size*.032),x=0,y=0){ const s=silhouette(size);ctx.save();ctx.globalAlpha=opacity;ctx.shadowColor='rgba(18,38,58,1)';ctx.shadowBlur=size*.045;ctx.drawImage(s,x,y+offsetY,size,size);ctx.restore(); }
-    function drawTo(id, painter){const c=$(id),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);painter(x,c.width,c.height);}
+    function drawTo(id, painter){const c=$(id),x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.clearRect(0,0,c.width,c.height);painter(x,c.width,c.height);}
     function paintScaled(ctx,w,h,paint){ const scale=+$('overall').value/100;ctx.save();ctx.translate(w/2,h/2);ctx.scale(scale,scale);ctx.translate(-w/2,-h/2);paint();ctx.restore(); }
     function drawAll(){ if(Object.keys(assets).length<8)return; const dev=makeDevice(1000);
       // 真实效果图：保留壳体/贴图/光影渲染，但不铺背景，导出为透明底 PNG
@@ -135,7 +135,7 @@
     $('render').onclick=drawAll;$('reset').onclick=init;
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
     $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
-    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=3'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=4'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
