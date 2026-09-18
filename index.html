@@ -40,7 +40,7 @@
       <div class="field"><label>素材上下位置</label><input id="offset" type="range" min="-12" max="12" value="0"><div class="range-row"><span>上移</span><span id="offsetText">0%</span><span>下移</span></div></div>
       <div class="field"><label>纸感强度</label><input id="grain" type="range" min="0" max="55" value="18"><div class="range-row"><span>平滑</span><span id="grainText">18%</span><span>颗粒</span></div></div>
       <div class="field"><label>整体缩放</label><input id="overall" type="range" min="70" max="100" value="93"><div class="range-row"><span>70%</span><span id="overallText">93%</span><span>100%</span></div></div>
-      <button id="render">生成全部效果图</button><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button class="secondary" id="reset">恢复默认素材</button>
+      <button id="render">生成全部效果图</button><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button id="zipAll" class="secondary">打包下载 ZIP</button><button class="secondary" id="reset">恢复默认素材</button>
       <div class="tips">提示：设计稿会按壳体印刷区等比“铺满”（超出短边自动裁切），图案只会出现在蒙版白色区域。壳体、蒙版与噪声需使用同一模板尺寸。</div>
     </aside>
     <section class="workspace">
@@ -51,6 +51,7 @@
       <article class="result wide"><div class="result-head"><h3>05 · 详情图</h3><button class="download" data-out="detail">下载</button></div><canvas id="detail" width="1200" height="5615" style="aspect-ratio:1200/5615"></canvas></article>
     </section>
   </main>
+  <script src="jszip.min.js"></script>
   <script>
     const $ = id => document.getElementById(id), assets = {};
     const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'shadow.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png'};
@@ -123,6 +124,14 @@
     }
     ['art','base','mask','noise','bg','side'].forEach(k=>$(k).addEventListener('change',e=>e.target.files[0]&&setFile(k,e.target.files[0])));
     ['scale','offset','grain','overall'].forEach(k=>$(k).addEventListener('input',()=>{$(k+'Text').textContent=$(k).value+'%';drawAll()}));
+    $('zipAll').onclick = async () => {
+      const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']];
+      const zip = new JSZip();
+      for(const [name,id] of files){ const blob = await new Promise(ok => $(id).toBlob(ok,'image/png')); zip.file(name, blob); }
+      const content = await zip.generateAsync({type:'blob'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(content); a.download = 'mockup-result.zip'; a.click();
+      $('status').textContent = '已打包 ZIP 开始下载';
+    };
     $('render').onclick=drawAll;$('reset').onclick=init;
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
     $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
