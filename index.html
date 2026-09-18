@@ -19,7 +19,9 @@
     button.secondary { background:#ecf0f4; color:#273444; margin-top:8px } .tips { background:#fff7da; padding:10px; border-radius:9px; color:#765700; font-size:12px; line-height:1.6; margin-top:14px }
     .workspace { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px }.result { overflow:hidden; padding:14px }.result.wide { grid-column:span 2 }
     .result-head { display:flex; align-items:center; justify-content:space-between; margin:0 2px 11px }.result h3 { font-size:14px; margin:0 }.download { width:auto; padding:7px 10px; margin:0; font-size:12px; background:#eaf2ff; color:#245a9d }
-    canvas { width:100%; display:block; background:#f8f8f8; border-radius:10px; aspect-ratio:1; object-fit:contain }
+    canvas { width:100%; max-width:400px; margin:0 auto; display:block; background:#f8f8f8; border-radius:10px; aspect-ratio:1; object-fit:contain }
+    .detail-scroll { height:460px; overflow-y:auto; border-radius:10px; background:#f8f8f8; border:1px solid #eef1f5 }
+    .detail-scroll canvas { max-width:none; width:100%; aspect-ratio:auto }
     /* 透明底预览：棋盘格表示该输出导出为无背景 PNG */
     #mockup { background:conic-gradient(#e6e8ec 0 25%, #ffffff 0 50%, #e6e8ec 0 75%, #ffffff 0) 0 0/22px 22px; }
     .status { font-size:12px; color:var(--muted); padding:5px 0 0 } @media(max-width:850px){main{grid-template-columns:1fr}.panel{position:static}.workspace{grid-template-columns:1fr}.result.wide{grid-column:auto}header{display:block}}
@@ -48,7 +50,7 @@
       <article class="result"><div class="result-head"><h3>02 · 白底产品图</h3><button class="download" data-out="white">下载</button></div><canvas id="white" width="1000" height="1000"></canvas></article>
       <article class="result"><div class="result-head"><h3>03 · 背景展示图</h3><button class="download" data-out="scene">下载</button></div><canvas id="scene" width="1000" height="1000"></canvas></article>
       <article class="result"><div class="result-head"><h3>04 · 正侧组合图</h3><button class="download" data-out="combo">下载</button></div><canvas id="combo" width="1000" height="1000"></canvas></article>
-      <article class="result wide"><div class="result-head"><h3>05 · 详情图</h3><button class="download" data-out="detail">下载</button></div><canvas id="detail" width="1200" height="5615" style="aspect-ratio:1200/5615"></canvas></article>
+      <article class="result wide"><div class="result-head"><h3>05 · 详情图</h3><button class="download" data-out="detail">下载</button></div><div class="detail-scroll"><canvas id="detail" width="1200" height="5615" style="aspect-ratio:auto"></canvas></div></article>
     </section>
   </main>
   <script src="jszip.min.js"></script>
@@ -120,6 +122,7 @@
       drawTo('detail',(x,w,h)=>{ x.drawImage(assets.detailBg,0,0,w,h);
         x.drawImage(assets.side, 464,206,148,1624, 405,2290,60,656);
         x.drawImage(dev, 297,2225,774,774); });
+      const ds=document.querySelector('.detail-scroll'); if(ds){ const dh=ds.clientWidth*5615/1200; requestAnimationFrame(()=>{ ds.scrollTop=dh*(2600/5615)-ds.clientHeight/2; }); }
       $('status').textContent='已生成 · 可直接下载 PNG';
     }
     ['art','base','mask','noise','bg','side'].forEach(k=>$(k).addEventListener('change',e=>e.target.files[0]&&setFile(k,e.target.files[0])));
@@ -135,7 +138,7 @@
     $('render').onclick=drawAll;$('reset').onclick=init;
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
     $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
-    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=4'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=5'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
