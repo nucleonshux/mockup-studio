@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>壳壳 Mockup Studio</title>
+  <style>
+    :root { --ink:#18212e; --muted:#6d7887; --paper:#f5f7fa; --accent:#ffbf1f; --card:#fff; }
+    * { box-sizing:border-box } body { margin:0; font-family:"Microsoft YaHei",system-ui,sans-serif; background:var(--paper); color:var(--ink) }
+    header { padding:28px max(24px,calc((100vw - 1260px)/2)); background:#111a26; color:#fff; display:flex; justify-content:space-between; align-items:center }
+    h1 { margin:0; font-size:24px; letter-spacing:.3px } header p { margin:5px 0 0; color:#aab5c3; font-size:13px }
+    main { max-width:1260px; padding:26px 24px 48px; margin:auto; display:grid; grid-template-columns:310px 1fr; gap:24px }
+    .panel,.result { background:var(--card); border:1px solid #e4e8ee; box-shadow:0 8px 24px #1a2a3a0a; border-radius:16px }
+    .panel { padding:20px; align-self:start; position:sticky; top:16px } h2 { margin:0 0 16px; font-size:16px }
+    .field { margin:14px 0 } label { display:block; font-size:13px; font-weight:700; margin-bottom:7px } small { color:var(--muted); display:block; font-size:11px; line-height:1.5; margin-top:5px }
+    input[type=file] { width:100%; font-size:12px; color:var(--muted) } input[type=range] { width:100%; accent-color:#f2af00 }
+    .range-row { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:4px }
+    button { border:0; border-radius:9px; padding:12px 14px; font:inherit; font-weight:700; cursor:pointer; width:100%; background:var(--accent); color:#342400; margin-top:12px; transition:.18s } button:hover { filter:brightness(.96); transform:translateY(-1px) }
+    button.secondary { background:#ecf0f4; color:#273444; margin-top:8px } .tips { background:#fff7da; padding:10px; border-radius:9px; color:#765700; font-size:12px; line-height:1.6; margin-top:14px }
+    .workspace { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px }.result { overflow:hidden; padding:14px }.result.wide { grid-column:span 2 }
+    .result-head { display:flex; align-items:center; justify-content:space-between; margin:0 2px 11px }.result h3 { font-size:14px; margin:0 }.download { width:auto; padding:7px 10px; margin:0; font-size:12px; background:#eaf2ff; color:#245a9d }
+    canvas { width:100%; display:block; background:#f8f8f8; border-radius:10px; aspect-ratio:1; object-fit:contain }
+    /* 透明底预览：棋盘格表示该输出导出为无背景 PNG */
+    #mockup { background:conic-gradient(#e6e8ec 0 25%, #ffffff 0 50%, #e6e8ec 0 75%, #ffffff 0) 0 0/22px 22px; }
+    .status { font-size:12px; color:var(--muted); padding:5px 0 0 } @media(max-width:850px){main{grid-template-columns:1fr}.panel{position:static}.workspace{grid-template-columns:1fr}.result.wide{grid-column:auto}header{display:block}}
+  </style>
+</head>
+<body>
+  <header><div><h1>壳壳 Mockup Studio</h1><p>替换素材后，一键生成真实贴图效果与三种展示图</p></div><div class="status" id="status">正在载入默认素材…</div></header>
+  <main>
+    <aside class="panel">
+      <h2>素材与模板</h2>
+      <div class="field"><label>设计素材图</label><input id="art" type="file" accept="image/*"><small>上传设计稿。默认使用“参考图2”。</small></div>
+      <div class="field"><label>壳体底图</label><input id="base" type="file" accept="image/*"><small>默认：素材底图.png</small></div>
+      <div class="field"><label>壳体蒙版</label><input id="mask" type="file" accept="image/*"><small>默认：素材图片蒙版.png</small></div>
+      <div class="field"><label>纸感噪声</label><input id="noise" type="file" accept="image/*"><small>默认：素材图片噪声.png</small></div>
+      <div class="field"><label>展示背景</label><input id="bg" type="file" accept="image/*"><small>默认：背景图.png</small></div>
+      <div class="field"><label>侧面壳体</label><input id="side" type="file" accept="image/*"><small>默认：素材底图2.png</small></div>
+      <div class="field"><label>素材缩放</label><input id="scale" type="range" min="85" max="125" value="100"><div class="range-row"><span>85%</span><span id="scaleText">100%</span><span>125%</span></div></div>
+      <div class="field"><label>素材上下位置</label><input id="offset" type="range" min="-12" max="12" value="0"><div class="range-row"><span>上移</span><span id="offsetText">0%</span><span>下移</span></div></div>
+      <div class="field"><label>纸感强度</label><input id="grain" type="range" min="0" max="55" value="18"><div class="range-row"><span>平滑</span><span id="grainText">18%</span><span>颗粒</span></div></div>
+      <div class="field"><label>整体缩放</label><input id="overall" type="range" min="70" max="100" value="93"><div class="range-row"><span>70%</span><span id="overallText">93%</span><span>100%</span></div></div>
+      <button id="render">生成全部效果图</button><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button class="secondary" id="reset">恢复默认素材</button>
+      <div class="tips">提示：设计稿会按壳体印刷区等比“铺满”（超出短边自动裁切），图案只会出现在蒙版白色区域。壳体、蒙版与噪声需使用同一模板尺寸。</div>
+    </aside>
+    <section class="workspace">
+      <article class="result"><div class="result-head"><h3>01 · 真实效果图</h3><button class="download" data-out="mockup">下载</button></div><canvas id="mockup" width="1000" height="1000"></canvas></article>
+      <article class="result"><div class="result-head"><h3>02 · 白底产品图</h3><button class="download" data-out="white">下载</button></div><canvas id="white" width="1000" height="1000"></canvas></article>
+      <article class="result"><div class="result-head"><h3>03 · 背景展示图</h3><button class="download" data-out="scene">下载</button></div><canvas id="scene" width="1000" height="1000"></canvas></article>
+      <article class="result"><div class="result-head"><h3>04 · 正侧组合图</h3><button class="download" data-out="combo">下载</button></div><canvas id="combo" width="1000" height="1000"></canvas></article>
+    </section>
+  </main>
+  <script>
+    const $ = id => document.getElementById(id), assets = {};
+    const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'shadow.png',bg:'背景图.png',side:'素材底图2.png'};
+    const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('素材无法加载：'+src)); i.src=src; });
+    const fit = (ctx,img,x,y,w,h,cover=true) => { const r=cover?Math.max(w/img.width,h/img.height):Math.min(w/img.width,h/img.height); const nw=img.width*r,nh=img.height*r; ctx.drawImage(img,x+(w-nw)/2,y+(h-nh)/2,nw,nh); };
+    // The supplied mask uses solid black pixels for lens holes (rather than transparent pixels).
+    // Convert its luminance to alpha: white = printable, black = a genuine cut-out.
+    function maskByLightness(size){
+      const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(assets.mask,0,0,size,size);
+      const p=x.getImageData(0,0,size,size); for(let i=0;i<p.data.length;i+=4){const l=(p.data[i]+p.data[i+1]+p.data[i+2])/3;p.data[i+3]=Math.round(l*p.data[i+3]/255);p.data[i]=p.data[i+1]=p.data[i+2]=255;} x.putImageData(p,0,0); return c;
+    }
+    function silhouette(size){ const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');x.drawImage(assets.shadow,0,0,size,size);x.globalCompositeOperation='source-in';x.fillStyle='#142030';x.fillRect(0,0,size,size);return c; }
+    async function setFile(key,file){ assets[key]=await load(URL.createObjectURL(file)); drawAll(); }
+    // Measured from the supplied 1000px template: the printable case area is x:302–698, y:80–918.
+    // Artwork is fitted to this tall rectangle (not the square canvas), preserving its ratio.
+    const printable = { x:.302, y:.080, w:.396, h:.838 };
+    function artLayer(size=1600){
+      const c=document.createElement('canvas');c.width=c.height=size; const x=c.getContext('2d');
+      const sc=+$('scale').value/100, area={x:printable.x*size,y:printable.y*size,w:printable.w*size,h:printable.h*size};
+      // "cover" makes both short edges meet the case edge; excess is cropped before applying the mask.
+      const r=Math.max(area.w/assets.art.width,area.h/assets.art.height)*sc, w=assets.art.width*r,h=assets.art.height*r;
+      const shift=+$('offset').value/100*area.h;
+      x.drawImage(assets.art,area.x+(area.w-w)/2,area.y+(area.h-h)/2+shift,w,h); return c;
+    }
+    function makeDevice(size=1000){
+      const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');
+      // The design stays 100% opaque; black lens holes and exterior transparency are cut away by the mask.
+      const alphaMask=maskByLightness(size), masked=document.createElement('canvas');masked.width=masked.height=size;const m=masked.getContext('2d');m.drawImage(artLayer(size),0,0);m.globalCompositeOperation='destination-in';m.drawImage(alphaMask,0,0);
+      x.drawImage(assets.base,0,0,size,size); x.drawImage(masked,0,0);
+      // The dedicated shadow layer supplies the clear-case reflections and contact shadows.
+      // It is separate from the base, so no original base artwork can show through the uploaded design.
+      const baseLight=document.createElement('canvas');baseLight.width=baseLight.height=size;const b=baseLight.getContext('2d');b.drawImage(assets.shadow,0,0,size,size);
+      b.globalCompositeOperation='destination-in';b.drawImage(alphaMask,0,0);
+      x.save();x.globalCompositeOperation='multiply';x.globalAlpha=.42;x.drawImage(baseLight,0,0);x.restore();
+      x.save();x.globalCompositeOperation='screen';x.globalAlpha=.18;x.drawImage(baseLight,0,0);x.restore();
+      // Restore pixels outside the printable (white) mask: lenses, flash and transparent exterior.
+      const hardware=document.createElement('canvas');hardware.width=hardware.height=size;const h=hardware.getContext('2d');h.drawImage(assets.base,0,0,size,size);h.globalCompositeOperation='destination-out';h.drawImage(alphaMask,0,0);x.drawImage(hardware,0,0);
+      // Controlled lighting, clipped to the print area, deepens the base-layer light direction.
+      const light=document.createElement('canvas');light.width=light.height=size;const l=light.getContext('2d');let g=l.createLinearGradient(0,0,size,0);
+      g.addColorStop(0,'rgba(255,255,255,.20)');g.addColorStop(.14,'rgba(255,255,255,.03)');g.addColorStop(.58,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.16)');l.fillStyle=g;l.fillRect(0,0,size,size);
+      g=l.createLinearGradient(0,0,0,size);g.addColorStop(0,'rgba(255,255,255,.09)');g.addColorStop(.68,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.14)');l.fillStyle=g;l.fillRect(0,0,size,size);
+      const cx=.47*size,cy=.255*size;g=l.createRadialGradient(cx,cy,size*.03,cx,cy,size*.19);g.addColorStop(0,'rgba(0,0,0,.15)');g.addColorStop(1,'rgba(0,0,0,0)');l.fillStyle=g;l.fillRect(0,0,size,size);
+      l.globalCompositeOperation='destination-in';l.drawImage(alphaMask,0,0);x.save();x.globalCompositeOperation='multiply';x.drawImage(light,0,0);x.restore();x.save();x.globalCompositeOperation='screen';x.globalAlpha=.18;x.drawImage(light,0,0);x.restore();
+      if(assets.noise){ const grain=document.createElement('canvas');grain.width=grain.height=size;const g=grain.getContext('2d');g.drawImage(assets.noise,0,0,size,size);g.globalCompositeOperation='destination-in';g.drawImage(alphaMask,0,0);x.save();x.globalCompositeOperation='overlay';x.globalAlpha=+$('grain').value/100;x.drawImage(grain,0,0);x.restore(); }
+      return c;
+    }
+    function shadow(ctx,x,y,w,h,a=.22){ctx.save();ctx.fillStyle=`rgba(15,30,45,${a})`;ctx.filter='blur('+Math.round(w*.045)+'px)';ctx.beginPath();ctx.roundRect(x+w*.1,y+h*.09,w*.8,h*.85,w*.1);ctx.fill();ctx.restore();}
+    function deviceShadow(ctx,size,opacity=.22,offsetY=25,x=0,y=0){ const s=silhouette(size);ctx.save();ctx.globalAlpha=opacity;ctx.filter='blur(34px)';ctx.drawImage(s,x,y+offsetY,size,size);ctx.restore(); }
+    function drawTo(id, painter){const c=$(id),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);painter(x,c.width,c.height);}
+    function paintScaled(ctx,w,h,paint){ const scale=+$('overall').value/100;ctx.save();ctx.translate(w/2,h/2);ctx.scale(scale,scale);ctx.translate(-w/2,-h/2);paint();ctx.restore(); }
+    function drawAll(){ if(Object.keys(assets).length<7)return; const dev=makeDevice(1000);
+      // 真实效果图：保留壳体/贴图/光影渲染，但不铺背景，导出为透明底 PNG
+      drawTo('mockup',(x,w,h)=>{paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
+      // Full-size placement matches the supplied 2000px reference compositions.
+      drawTo('white',(x,w,h)=>{x.fillStyle='#fff';x.fillRect(0,0,w,h);paintScaled(x,w,h,()=>{deviceShadow(x,w,.24,35);x.drawImage(dev,0,0,w,h)})});
+      drawTo('scene',(x,w,h)=>{fit(x,assets.bg,0,0,w,h,true);paintScaled(x,w,h,()=>{deviceShadow(x,w,.25,32);x.drawImage(dev,0,0,w,h)})});
+      // 正侧组合图（参考图4 版式，1000px 画布）：左侧边条 + 右侧正面，等高并排。
+      // 素材底图2.png 为 2000px，侧边壳体在源图 x470..614、y206..1820（其余透明）。
+      // 侧边壳 y104..934（高830）；正面壳缩到 956 后 y104..934，与侧边上下对齐。
+      // dev(1000) 内正面壳 y84..952；缩放 830/868≈0.956，画 956x956 于(104,24)。
+      drawTo('combo',(x,w,h)=>{fit(x,assets.bg,0,0,w,h,true);paintScaled(x,w,h,()=>{
+        x.drawImage(assets.side, 470,206,144,1614, 236,104,72,820);
+        deviceShadow(x,967,.22,18,101,23);
+        x.drawImage(dev,101,23,967,967);
+      })});
+      $('status').textContent='已生成 · 可直接下载 PNG';
+    }
+    ['art','base','mask','noise','bg','side'].forEach(k=>$(k).addEventListener('change',e=>e.target.files[0]&&setFile(k,e.target.files[0])));
+    ['scale','offset','grain','overall'].forEach(k=>$(k).addEventListener('input',()=>{$(k+'Text').textContent=$(k).value+'%';drawAll()}));
+    $('render').onclick=drawAll;$('reset').onclick=init;
+    document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
+    $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
+    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v='+Date.now()); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    init();
+  </script>
+</body></html>
