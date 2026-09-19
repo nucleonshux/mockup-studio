@@ -95,7 +95,8 @@
       const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
       // The design stays 100% opaque; black lens holes and exterior transparency are cut away by the mask.
       const alphaMask=maskByLightness(size), masked=document.createElement('canvas');masked.width=masked.height=size;const m=masked.getContext('2d');m.drawImage(artLayer(size),0,0);m.globalCompositeOperation='destination-in';m.drawImage(alphaMask,0,0);
-      x.drawImage(assets.base,0,0,size,size); x.save();x.globalCompositeOperation='screen';x.globalAlpha=.12;x.fillStyle='#fff';x.fillRect(0,0,size,size);x.restore();
+      x.drawImage(assets.base,0,0,size,size);
+      const wash=document.createElement('canvas');wash.width=wash.height=size;const wc=wash.getContext('2d');wc.globalAlpha=.12;wc.fillStyle='#fff';wc.fillRect(0,0,size,size);wc.globalCompositeOperation='destination-in';wc.drawImage(assets.base,0,0,size,size);x.drawImage(wash,0,0);
       const artSh=document.createElement('canvas');artSh.width=artSh.height=size;const asx=artSh.getContext('2d');asx.drawImage(masked,0,0);asx.globalCompositeOperation='source-in';asx.fillStyle='rgba(0,0,0,.18)';asx.fillRect(0,0,size,size);
       x.drawImage(artSh,2,2);
       x.drawImage(masked,0,0);
@@ -161,7 +162,7 @@
     $('render').onclick=drawAll;$('reset').onclick=init;
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
     $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
-    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=21'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=22'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
