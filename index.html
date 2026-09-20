@@ -20,7 +20,7 @@
     .workspace { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px }.result { overflow:hidden; padding:14px }.result.wide { grid-column:span 2 }
     .result-head { display:flex; align-items:center; justify-content:space-between; margin:0 2px 11px }.result h3 { font-size:14px; margin:0 }.download { width:auto; padding:7px 10px; margin:0; font-size:12px; background:#eaf2ff; color:#245a9d }
     canvas { width:100%; max-width:400px; margin:0 auto; display:block; background:#f8f8f8; border-radius:10px; aspect-ratio:1; object-fit:contain }
-    .detail-scroll { height:460px; overflow-y:auto; border-radius:10px; background:#f8f8f8; border:1px solid #eef1f5 }
+    .detail-scroll { height:780px; overflow-y:auto; border-radius:10px; background:#f8f8f8; border:1px solid #eef1f5 }
     .detail-scroll canvas { max-width:none; width:100%; aspect-ratio:auto }
     /* 透明底预览：棋盘格表示该输出导出为无背景 PNG */
     #mockup { background:conic-gradient(#e6e8ec 0 25%, #ffffff 0 50%, #e6e8ec 0 75%, #ffffff 0) 0 0/22px 22px; }
@@ -38,11 +38,18 @@
       <div class="field"><label>纸感噪声</label><input id="noise" type="file" accept="image/*"></div>
       <div class="field"><label>展示背景</label><input id="bg" type="file" accept="image/*"></div>
       <div class="field"><label>侧面壳体</label><input id="side" type="file" accept="image/*"></div>
+      <div class="field"><label>水印图片</label><input id="watermark" type="file" accept="image/*"></div>
+      <div class="field"><label>水印透明度</label><input id="wmOpacity" type="range" min="0" max="100" value="0"><div class="range-row"><span>0%</span><span id="wmOpacityText">0%</span><span>100%</span></div></div>
+      <div class="field"><label>水印水平</label><input id="wmX" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="wmXText">0</span><span>+200</span></div></div>
+      <div class="field"><label>水印垂直</label><input id="wmY" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="wmYText">0</span><span>+200</span></div></div>
+      <div class="field"><label>水印大小</label><input id="wmSize" type="range" min="10" max="200" value="60"><div class="range-row"><span>10%</span><span id="wmSizeText">60%</span><span>200%</span></div></div>
       <div class="field"><label>素材缩放</label><input id="scale" type="range" min="85" max="125" value="100"><div class="range-row"><span>85%</span><span id="scaleText">100%</span><span>125%</span></div></div>
       <div class="field"><label>素材上下位置</label><input id="offset" type="range" min="-12" max="12" value="0"><div class="range-row"><span>上移</span><span id="offsetText">0%</span><span>下移</span></div></div>
       <div class="field"><label>纸感强度</label><input id="grain" type="range" min="0" max="55" value="0"><div class="range-row"><span>平滑</span><span id="grainText">0%</span><span>颗粒</span></div></div>
       <div class="field"><label>整体缩放</label><input id="overall" type="range" min="70" max="100" value="93"><div class="range-row"><span>70%</span><span id="overallText">93%</span><span>100%</span></div></div>
       <div class="field"><label>背景图缩放</label><input id="bgScale" type="range" min="50" max="200" value="100"><div class="range-row"><span>50%</span><span id="bgScaleText">100%</span><span>200%</span></div></div>
+      <div class="field"><label>详情壳水平</label><input id="detailX" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="detailXText">0</span><span>+200</span></div></div>
+      <div class="field"><label>详情壳垂直</label><input id="detailY" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="detailYText">0</span><span>+200</span></div></div>
       <div style="display:flex;gap:10px;margin-top:12px"><button id="tb" class="secondary on" style="margin-top:0">淘宝版</button><button id="dd" class="secondary" style="margin-top:0">多多版</button></div><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button id="zipAll" class="secondary">打包下载 ZIP</button><button class="secondary" id="reset">恢复默认素材</button>
       <div class="tips">提示：设计稿会按壳体印刷区等比“铺满”（超出短边自动裁切），图案只会出现在蒙版白色区域。壳体、蒙版与噪声需使用同一模板尺寸。</div>
       <div class="field"><label>从 Pinterest 找图</label>
@@ -62,7 +69,7 @@
   <script src="jszip.min.js"></script>
   <script>
     const $ = id => document.getElementById(id), assets = {};
-    const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'高反差.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png',innerShadow:'内阴影.png',ddBg:'多多背景图.png',ddDetail:'多多详情.png'};
+    const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'高反差.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png',innerShadow:'内阴影.png',ddBg:'多多背景图.png',ddDetail:'多多详情.png',wmT1:'t1.png',wmT2:'t2.png'};
     const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('素材无法加载：'+src)); i.src=src; });
     const fit = (ctx,img,x,y,w,h,cover=true) => { const r=cover?Math.max(w/img.width,h/img.height):Math.min(w/img.width,h/img.height); const nw=img.width*r,nh=img.height*r; ctx.drawImage(img,x+(w-nw)/2,y+(h-nh)/2,nw,nh); };
     let version='taobao'; const drawBg=(x,w,h)=>{ const img=version==='duoduo'?assets.ddBg:assets.bg, bs=+$('bgScale').value/100, r=Math.max(w/img.width,h/img.height)*bs, nw=img.width*r, nh=img.height*r; x.drawImage(img,(w-nw)/2,(h-nh)/2,nw,nh); };
@@ -124,6 +131,15 @@
       g=l.createLinearGradient(0,0,0,size);g.addColorStop(0,'rgba(255,255,255,.09)');g.addColorStop(.68,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.07)');l.fillStyle=g;l.fillRect(0,0,size,size);
       const cx=.47*size,cy=.255*size;g=l.createRadialGradient(cx,cy,size*.03,cx,cy,size*.19);g.addColorStop(0,'rgba(0,0,0,.08)');g.addColorStop(1,'rgba(0,0,0,0)');l.fillStyle=g;l.fillRect(0,0,size,size);
       l.globalCompositeOperation='destination-in';l.drawImage(alphaMask,0,0);x.save();x.globalCompositeOperation='multiply';x.drawImage(light,0,0);x.restore();x.save();x.globalCompositeOperation='screen';x.globalAlpha=.18;x.drawImage(light,0,0);x.restore();
+      // 水印层：按透明度/位置/大小，叠在印刷区并被蒙版裁掉
+      const wmImg = assets.wmCustom || (version==='duoduo'?assets.wmT2:assets.wmT1);
+      if(wmImg && +$('wmOpacity').value>0){ const wm=document.createElement('canvas');wm.width=wm.height=size;const wc=wm.getContext('2d');
+        const pw=printable.w*size, ph=printable.h*size, pcx=(printable.x+printable.w/2)*size, pcy=(printable.y+printable.h/2)*size;
+        const wsize=pw*+$('wmSize').value/100; const wr=wsize/wmImg.width, wh=wmImg.height*wr;
+        const wx=pcx-wsize/2+ +$('wmX').value, wy=pcy-wh/2+ +$('wmY').value;
+        wc.globalAlpha=+$('wmOpacity').value/100; wc.drawImage(wmImg,wx,wy,wsize,wh);
+        wc.globalCompositeOperation='destination-in'; wc.drawImage(alphaMask,0,0);
+        x.save(); x.drawImage(wm,0,0); x.restore(); }
       if(assets.noise){ const grain=document.createElement('canvas');grain.width=grain.height=size;const g=grain.getContext('2d',{willReadFrequently:true});g.drawImage(assets.noise,0,0,size,size);
         const np=g.getImageData(0,0,size,size);let sum=0;for(let j=0;j<np.data.length;j+=4){const v=(np.data[j]+np.data[j+1]+np.data[j+2])/3;np.data[j]=np.data[j+1]=np.data[j+2]=v;sum+=v;}const off=128-sum/(np.data.length/4);for(let j=0;j<np.data.length;j+=4){const v=Math.max(0,Math.min(255,np.data[j]+off));np.data[j]=np.data[j+1]=np.data[j+2]=v;}g.putImageData(np,0,0);
         g.globalCompositeOperation='destination-in';g.drawImage(alphaMask,0,0);x.save();x.globalCompositeOperation='overlay';x.globalAlpha=+$('grain').value/100;x.drawImage(grain,0,0);x.restore(); }
@@ -133,7 +149,7 @@
     function deviceShadow(ctx,size,opacity=.22,offsetY=Math.round(size*.032),x=0,y=0){ const s=silhouette(size);ctx.save();ctx.globalAlpha=opacity;ctx.shadowColor='rgba(18,38,58,1)';ctx.shadowBlur=size*.045;ctx.drawImage(s,x,y+offsetY,size,size);ctx.restore(); }
     function drawTo(id, painter){const c=$(id),x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.clearRect(0,0,c.width,c.height);painter(x,c.width,c.height);}
     function paintScaled(ctx,w,h,paint){ const scale=+$('overall').value/100;ctx.save();ctx.translate(w/2,h/2);ctx.scale(scale,scale);ctx.translate(-w/2,-h/2);paint();ctx.restore(); }
-    function drawAll(){ if(Object.keys(assets).length<11)return; const dev=makeDevice(1000);
+    function drawAll(){ if(Object.keys(assets).length<13)return; const dev=makeDevice(1000);
       // 真实效果图：保留壳体/贴图/光影渲染，但不铺背景，导出为透明底 PNG
       drawTo('mockup',(x,w,h)=>{paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
       // Full-size placement matches the supplied 2000px reference compositions.
@@ -150,12 +166,32 @@
       // 05 详情图：详情底图(1200x5615) + 正侧组合图按参考图6位置(216,2207,800x800)叠放
       // 05 详情图：按版本选底图与产品位置
       const dc=$('detail'); dc.height = (version==='duoduo')?3400:5615;
-      drawTo('detail',(x,w,h)=>{ if(version==='duoduo'){ x.drawImage(assets.ddDetail,0,0,w,h); x.drawImage(dev,55,1235,1090,1090); } else { x.drawImage(assets.detailBg,0,0,w,h); x.drawImage(assets.side,464,206,148,1624,405,2290,60,656); x.drawImage(dev,297,2225,774,774); } });
+      drawTo('detail',(x,w,h)=>{ const ov=+$('overall').value/100, ox=+$('detailX').value, oy=+$('detailY').value;
+      if(version==='duoduo'){ x.drawImage(assets.ddDetail,0,0,w,h); const bs=1090*ov,nx=55+1090/2-bs/2+ox,ny=1235+1090/2-bs/2+oy; x.drawImage(dev,nx,ny,bs,bs); }
+      else { x.drawImage(assets.detailBg,0,0,w,h); x.save(); x.translate(ox,oy); x.translate(600,2612); x.scale(ov,ov); x.translate(-600,-2612);
+        x.drawImage(assets.side,464,206,148,1624,405,2290,60,656); x.drawImage(dev,297,2225,774,774); x.restore(); } });
       const ds=document.querySelector('.detail-scroll'); if(ds){ const dh=ds.clientWidth*(dc.height)/1200; const cy=(version==='duoduo')?1700:2600; requestAnimationFrame(()=>{ ds.scrollTop=dh*(cy/dc.height)-ds.clientHeight/2; }); }
       $('status').textContent='已生成 · 可直接下载 PNG';
     }
     ['art','base','mask','noise','bg','side'].forEach(k=>$(k).addEventListener('change',e=>e.target.files[0]&&setFile(k,e.target.files[0])));
-    ['scale','offset','grain','overall','bgScale'].forEach(k=>$(k).addEventListener('input',()=>{$(k+'Text').textContent=$(k).value+'%';drawAll()}));
+$('watermark').addEventListener('change',e=>{ if(e.target.files[0]){ setFile('wmCustom',e.target.files[0]); } });
+    ['scale','offset','grain','overall','bgScale','wmOpacity','wmSize'].forEach(k=>$(k).addEventListener('input',()=>{$(k+'Text').textContent=$(k).value+'%';drawAll()}));
+['detailX','detailY'].forEach(k=>$(k).addEventListener('input',()=>{ let v=+$(k).value; if(Math.abs(v)<=4){$(k).value=0;v=0;} $(k+'Text').textContent=v;drawAll();}));
+$('wmX').addEventListener('input',()=>{ let v=+$('wmX').value; if(Math.abs(v)<=4){$('wmX').value=0;v=0;} $('wmXText').textContent=v;drawAll();});
+$('wmY').addEventListener('input',()=>{ let v=+$('wmY').value; if(Math.abs(v)<=4){$('wmY').value=0;v=0;} $('wmYText').textContent=v;drawAll();});
+    ['detailX','detailY','wmX','wmY'].forEach(k=>{
+      $(k).addEventListener('change',()=>{
+        const v=+$(k).value;
+        if(Math.abs(v)<=5){ $(k).value=0; $(k+'Text').textContent='0'; drawAll(); }
+      });
+    });
+    $('saveAll').onclick = async () => {
+      const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']];
+      try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'});
+        for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close();}
+        $('status').textContent='已保存到所选文件夹';
+      } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click();}); $('status').textContent='浏览器不支持文件夹选择，已改为逐张下载'; }
+    };
     $('zipAll').onclick = async () => {
       const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']];
       const zip = new JSZip();
@@ -164,10 +200,9 @@
       const a = document.createElement('a'); a.href = URL.createObjectURL(content); a.download = 'mockup-result.zip'; a.click();
       $('status').textContent = '已打包 ZIP 开始下载';
     };
-    $('openPin').onclick=()=>window.open('https://www.pinterest.com/','_blank');
     $('tb').onclick=()=>{version='taobao';$('tb').classList.add('on');$('dd').classList.remove('on');drawAll();};$('dd').onclick=()=>{version='duoduo';$('dd').classList.add('on');$('tb').classList.remove('on');drawAll();};$('reset').onclick=init;
     $('usePin').onclick=()=>{ const u=$('pinUrl').value.trim(); if(!u){$('status').textContent='请先粘贴图片地址';return;} const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>{assets.art=img;drawAll();$('status').textContent='已应用图片';}; img.onerror=()=>{$('status').textContent='加载失败';}; img.src='https://images.weserv.nl/?url='+encodeURIComponent(u.replace(/^https?:\/\//,'')); }
-    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=26'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=27'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
