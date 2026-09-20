@@ -45,7 +45,11 @@
       <div class="field"><label>背景图缩放</label><input id="bgScale" type="range" min="50" max="200" value="100"><div class="range-row"><span>50%</span><span id="bgScaleText">100%</span><span>200%</span></div></div>
       <div style="display:flex;gap:10px;margin-top:12px"><button id="tb" class="secondary on" style="margin-top:0">淘宝版</button><button id="dd" class="secondary" style="margin-top:0">多多版</button></div><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button id="zipAll" class="secondary">打包下载 ZIP</button><button class="secondary" id="reset">恢复默认素材</button>
       <div class="tips">提示：设计稿会按壳体印刷区等比“铺满”（超出短边自动裁切），图案只会出现在蒙版白色区域。壳体、蒙版与噪声需使用同一模板尺寸。</div>
-      <div class="field"><label>从 Pinterest 找图</label><button id="openPin" style="margin-top:0;background:#eaf2ff;color:#245a9d">打开 Pinterest 浏览</button><small>找到后右键图片另存，再拖到上方"设计素材图"上传。</small></div>
+      <div class="field"><label>从 Pinterest 找图</label>
+        <button id="openPin" style="margin-top:0;background:#eaf2ff;color:#245a9d">打开 Pinterest 浏览</button>
+        <input id="pinUrl" type="text" placeholder="在图上右键→复制图片地址，粘贴到这里" style="width:100%;margin-top:8px;font-size:12px;padding:8px;border:1px solid #d8dde4;border-radius:8px">
+        <button id="usePin" style="margin-top:8px">预览此图</button>
+      </div>
     </aside>
     <section class="workspace">
       <article class="result"><div class="result-head"><h3>01 · 真实效果图</h3><button class="download" data-out="mockup">下载</button></div><canvas id="mockup" width="1000" height="1000"></canvas></article>
@@ -161,6 +165,7 @@
       $('status').textContent = '已打包 ZIP 开始下载';
     };
     $('openPin').onclick=()=>window.open('https://www.pinterest.com/','_blank');
+    $('usePin').onclick=()=>{ const u=$('pinUrl').value.trim(); if(!u){$('status').textContent='请先粘贴图片地址';return;} const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>{assets.art=img;drawAll();$('status').textContent='已应用图片';}; img.onerror=()=>{$('status').textContent='加载失败';}; img.src='https://images.weserv.nl/?url='+encodeURIComponent(u.replace(/^https?:\/\//,'')); }
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
     $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
     async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=26'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
