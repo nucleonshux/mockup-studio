@@ -16,7 +16,7 @@
     input[type=file] { width:100%; font-size:12px; color:var(--muted) } input[type=range] { width:100%; accent-color:#f2af00 }
     .range-row { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:4px }
     button { border:0; border-radius:9px; padding:12px 14px; font:inherit; font-weight:700; cursor:pointer; width:100%; background:var(--accent); color:#342400; margin-top:12px; transition:.18s } button:hover { filter:brightness(.96); transform:translateY(-1px) }
-    button.secondary { background:#ecf0f4; color:#273444; margin-top:8px } .tips { background:#fff7da; padding:10px; border-radius:9px; color:#765700; font-size:12px; line-height:1.6; margin-top:14px }
+    button.secondary { background:#ecf0f4; color:#273444; margin-top:8px } .tips { background:#fff7da; padding:10px; border-radius:9px; color:#765700; font-size:12px; line-height:1.6; margin-top:14px } button.on{background:var(--accent)!important;color:#342400!important}
     .workspace { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px }.result { overflow:hidden; padding:14px }.result.wide { grid-column:span 2 }
     .result-head { display:flex; align-items:center; justify-content:space-between; margin:0 2px 11px }.result h3 { font-size:14px; margin:0 }.download { width:auto; padding:7px 10px; margin:0; font-size:12px; background:#eaf2ff; color:#245a9d }
     canvas { width:100%; max-width:400px; margin:0 auto; display:block; background:#f8f8f8; border-radius:10px; aspect-ratio:1; object-fit:contain }
@@ -43,7 +43,7 @@
       <div class="field"><label>纸感强度</label><input id="grain" type="range" min="0" max="55" value="0"><div class="range-row"><span>平滑</span><span id="grainText">0%</span><span>颗粒</span></div></div>
       <div class="field"><label>整体缩放</label><input id="overall" type="range" min="70" max="100" value="93"><div class="range-row"><span>70%</span><span id="overallText">93%</span><span>100%</span></div></div>
       <div class="field"><label>背景图缩放</label><input id="bgScale" type="range" min="50" max="200" value="100"><div class="range-row"><span>50%</span><span id="bgScaleText">100%</span><span>200%</span></div></div>
-      <div style="display:flex;gap:10px;margin-top:12px"><button id="tb" style="margin-top:0">淘宝版</button><button id="dd" class="secondary" style="margin-top:0">多多版</button></div><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button id="zipAll" class="secondary">打包下载 ZIP</button><button class="secondary" id="reset">恢复默认素材</button>
+      <div style="display:flex;gap:10px;margin-top:12px"><button id="tb" class="on" style="margin-top:0">淘宝版</button><button id="dd" class="secondary" style="margin-top:0">多多版</button></div><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button id="zipAll" class="secondary">打包下载 ZIP</button><button class="secondary" id="reset">恢复默认素材</button>
       <div class="tips">提示：设计稿会按壳体印刷区等比“铺满”（超出短边自动裁切），图案只会出现在蒙版白色区域。壳体、蒙版与噪声需使用同一模板尺寸。</div>
     </aside>
     <section class="workspace">
@@ -159,10 +159,10 @@
       const a = document.createElement('a'); a.href = URL.createObjectURL(content); a.download = 'mockup-result.zip'; a.click();
       $('status').textContent = '已打包 ZIP 开始下载';
     };
-    $('tb').onclick=()=>{version='taobao';drawAll();};$('dd').onclick=()=>{version='duoduo';drawAll();};$('reset').onclick=init;
+    $('tb').onclick=()=>{version='taobao';$('tb').classList.add('on');$('dd').classList.remove('on');drawAll();};$('dd').onclick=()=>{version='duoduo';$('dd').classList.add('on');$('tb').classList.remove('on');drawAll();};$('reset').onclick=init;
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
     $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
-    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=23'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=24'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
