@@ -43,7 +43,7 @@
       <div class="field"><label>纸感强度</label><input id="grain" type="range" min="0" max="55" value="0"><div class="range-row"><span>平滑</span><span id="grainText">0%</span><span>颗粒</span></div></div>
       <div class="field"><label>整体缩放</label><input id="overall" type="range" min="70" max="100" value="93"><div class="range-row"><span>70%</span><span id="overallText">93%</span><span>100%</span></div></div>
       <div class="field"><label>背景图缩放</label><input id="bgScale" type="range" min="50" max="200" value="100"><div class="range-row"><span>50%</span><span id="bgScaleText">100%</span><span>200%</span></div></div>
-      <button id="render">生成全部效果图</button><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button id="zipAll" class="secondary">打包下载 ZIP</button><button class="secondary" id="reset">恢复默认素材</button>
+      <div style="display:flex;gap:10px;margin-top:12px"><button id="tb" style="margin-top:0">淘宝版</button><button id="dd" class="secondary" style="margin-top:0">多多版</button></div><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button id="zipAll" class="secondary">打包下载 ZIP</button><button class="secondary" id="reset">恢复默认素材</button>
       <div class="tips">提示：设计稿会按壳体印刷区等比“铺满”（超出短边自动裁切），图案只会出现在蒙版白色区域。壳体、蒙版与噪声需使用同一模板尺寸。</div>
     </aside>
     <section class="workspace">
@@ -57,10 +57,10 @@
   <script src="jszip.min.js"></script>
   <script>
     const $ = id => document.getElementById(id), assets = {};
-    const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'高反差.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png',innerShadow:'内阴影.png'};
+    const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'高反差.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png',innerShadow:'内阴影.png',ddBg:'多多背景图.png',ddDetail:'多多详情.png'};
     const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('素材无法加载：'+src)); i.src=src; });
     const fit = (ctx,img,x,y,w,h,cover=true) => { const r=cover?Math.max(w/img.width,h/img.height):Math.min(w/img.width,h/img.height); const nw=img.width*r,nh=img.height*r; ctx.drawImage(img,x+(w-nw)/2,y+(h-nh)/2,nw,nh); };
-    const drawBg=(x,w,h)=>{ const img=assets.bg, bs=+$('bgScale').value/100, r=Math.max(w/img.width,h/img.height)*bs, nw=img.width*r, nh=img.height*r; x.drawImage(img,(w-nw)/2,(h-nh)/2,nw,nh); };
+    let version='taobao'; const drawBg=(x,w,h)=>{ const img=version==='duoduo'?assets.ddBg:assets.bg, bs=+$('bgScale').value/100, r=Math.max(w/img.width,h/img.height)*bs, nw=img.width*r, nh=img.height*r; x.drawImage(img,(w-nw)/2,(h-nh)/2,nw,nh); };
     // The supplied mask uses solid black pixels for lens holes (rather than transparent pixels).
     // Convert its luminance to alpha: white = printable, black = a genuine cut-out.
     function maskByLightness(size){
@@ -128,7 +128,7 @@
     function deviceShadow(ctx,size,opacity=.22,offsetY=Math.round(size*.032),x=0,y=0){ const s=silhouette(size);ctx.save();ctx.globalAlpha=opacity;ctx.shadowColor='rgba(18,38,58,1)';ctx.shadowBlur=size*.045;ctx.drawImage(s,x,y+offsetY,size,size);ctx.restore(); }
     function drawTo(id, painter){const c=$(id),x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.clearRect(0,0,c.width,c.height);painter(x,c.width,c.height);}
     function paintScaled(ctx,w,h,paint){ const scale=+$('overall').value/100;ctx.save();ctx.translate(w/2,h/2);ctx.scale(scale,scale);ctx.translate(-w/2,-h/2);paint();ctx.restore(); }
-    function drawAll(){ if(Object.keys(assets).length<9)return; const dev=makeDevice(1000);
+    function drawAll(){ if(Object.keys(assets).length<11)return; const dev=makeDevice(1000);
       // 真实效果图：保留壳体/贴图/光影渲染，但不铺背景，导出为透明底 PNG
       drawTo('mockup',(x,w,h)=>{paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
       // Full-size placement matches the supplied 2000px reference compositions.
@@ -143,10 +143,10 @@
         x.drawImage(dev,101,23,967,967);
       })});
       // 05 详情图：详情底图(1200x5615) + 正侧组合图按参考图6位置(216,2207,800x800)叠放
-      drawTo('detail',(x,w,h)=>{ x.drawImage(assets.detailBg,0,0,w,h);
-        x.drawImage(assets.side, 464,206,148,1624, 405,2290,60,656);
-        x.drawImage(dev, 297,2225,774,774); });
-      const ds=document.querySelector('.detail-scroll'); if(ds){ const dh=ds.clientWidth*5615/1200; requestAnimationFrame(()=>{ ds.scrollTop=dh*(2600/5615)-ds.clientHeight/2; }); }
+      // 05 详情图：按版本选底图与产品位置
+      const dc=$('detail'); dc.height = (version==='duoduo')?3400:5615;
+      drawTo('detail',(x,w,h)=>{ if(version==='duoduo'){ x.drawImage(assets.ddDetail,0,0,w,h); x.drawImage(dev,55,1235,1090,1090); } else { x.drawImage(assets.detailBg,0,0,w,h); x.drawImage(assets.side,464,206,148,1624,405,2290,60,656); x.drawImage(dev,297,2225,774,774); } });
+      const ds=document.querySelector('.detail-scroll'); if(ds){ const dh=ds.clientWidth*(dc.height)/1200; const cy=(version==='duoduo')?1700:2600; requestAnimationFrame(()=>{ ds.scrollTop=dh*(cy/dc.height)-ds.clientHeight/2; }); }
       $('status').textContent='已生成 · 可直接下载 PNG';
     }
     ['art','base','mask','noise','bg','side'].forEach(k=>$(k).addEventListener('change',e=>e.target.files[0]&&setFile(k,e.target.files[0])));
@@ -159,10 +159,10 @@
       const a = document.createElement('a'); a.href = URL.createObjectURL(content); a.download = 'mockup-result.zip'; a.click();
       $('status').textContent = '已打包 ZIP 开始下载';
     };
-    $('render').onclick=drawAll;$('reset').onclick=init;
+    $('tb').onclick=()=>{version='taobao';drawAll();};$('dd').onclick=()=>{version='duoduo';drawAll();};$('reset').onclick=init;
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
     $('saveAll').onclick=async()=>{ const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']]; try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'}); for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close()} $('status').textContent='四张 PNG 已保存到所选文件夹'; } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click()});$('status').textContent='浏览器未授权文件夹，已改为逐张下载'; } };
-    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=22'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=23'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
