@@ -71,8 +71,8 @@
   <script>
     const $ = id => document.getElementById(id), assets = {};
     const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'高反差.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png',innerShadow:'内阴影.png',ddBg:'多多背景图.png',ddDetail:'多多详情.png',wmT1:'t1.png',wmT2:'t2.png'};
-    let mold='clear'; const moldSets={ clear:{base:'素材底图.png',mask:'素材图片蒙版.png',side:'素材底图2.png',shadow:'高反差.png'}, carbon:{base:'碳纤维模具/素材底图.png',mask:'碳纤维模具/素材图片蒙版.png',side:'碳纤维模具/素材底图2.png',shadow:'碳纤维模具/阴影.png'} };
-    async function setMold(m){ mold=m; $('moldClear').classList.toggle('on',m==='clear'); $('moldCarbon').classList.toggle('on',m==='carbon'); $('status').textContent='正在加载'+(m==='carbon'?'碳纤维黑磨砂':'透明壳')+'模具素材…'; for(const k of ['base','mask','side','shadow']) assets[k]=await load(moldSets[m][k]+'?v=27'); drawAll(); }
+    let mold='clear'; const moldSets={ clear:{base:'素材底图.png',mask:'素材图片蒙版.png',side:'素材底图2.png',shadow:'高反差.png',detailBg:'详情底图.png'}, carbon:{base:'碳纤维模具/素材底图.png',mask:'碳纤维模具/素材图片蒙版.png',side:'碳纤维模具/素材底图2.png',shadow:'碳纤维模具/阴影.png',detailBg:'碳纤维模具/txq.png'} };
+    async function setMold(m){ mold=m; $('moldClear').classList.toggle('on',m==='clear'); $('moldCarbon').classList.toggle('on',m==='carbon'); $('status').textContent='正在加载'+(m==='carbon'?'碳纤维黑磨砂':'透明壳')+'模具素材…'; for(const k of ['base','mask','side','shadow','detailBg']) assets[k]=await load(moldSets[m][k]+'?v=27'); drawAll(); }
     const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('素材无法加载：'+src)); i.src=src; });
     const fit = (ctx,img,x,y,w,h,cover=true) => { const r=cover?Math.max(w/img.width,h/img.height):Math.min(w/img.width,h/img.height); const nw=img.width*r,nh=img.height*r; ctx.drawImage(img,x+(w-nw)/2,y+(h-nh)/2,nw,nh); };
     let version='taobao'; const drawBg=(x,w,h)=>{ const img=version==='duoduo'?assets.ddBg:assets.bg, bs=+$('bgScale').value/100, r=Math.max(w/img.width,h/img.height)*bs, nw=img.width*r, nh=img.height*r; x.drawImage(img,(w-nw)/2,(h-nh)/2,nw,nh); };
