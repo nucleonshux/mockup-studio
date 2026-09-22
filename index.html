@@ -32,6 +32,7 @@
   <main>
     <aside class="panel">
       <h2>素材与模板</h2>
+      <div style="display:flex;gap:10px;margin-bottom:2px"><button id="moldClear" class="secondary on" style="margin-top:0">透明壳</button><button id="moldCarbon" class="secondary" style="margin-top:0">碳纤维黑磨砂</button></div>
       <div class="field"><label>设计素材图</label><input id="art" type="file" accept="image/*"></div>
       <div class="field"><label>壳体底图</label><input id="base" type="file" accept="image/*"></div>
       <div class="field"><label>壳体蒙版</label><input id="mask" type="file" accept="image/*"></div>
@@ -70,6 +71,8 @@
   <script>
     const $ = id => document.getElementById(id), assets = {};
     const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'高反差.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png',innerShadow:'内阴影.png',ddBg:'多多背景图.png',ddDetail:'多多详情.png',wmT1:'t1.png',wmT2:'t2.png'};
+    let mold='clear'; const moldSets={ clear:{base:'素材底图.png',mask:'素材图片蒙版.png',side:'素材底图2.png',shadow:'高反差.png'}, carbon:{base:'碳纤维模具/素材底图.png',mask:'碳纤维模具/素材图片蒙版.png',side:'碳纤维模具/素材底图2.png',shadow:'碳纤维模具/阴影.png'} };
+    async function setMold(m){ mold=m; $('moldClear').classList.toggle('on',m==='clear'); $('moldCarbon').classList.toggle('on',m==='carbon'); $('status').textContent='正在加载'+(m==='carbon'?'碳纤维黑磨砂':'透明壳')+'模具素材…'; for(const k of ['base','mask','side','shadow']) assets[k]=await load(moldSets[m][k]+'?v=27'); drawAll(); }
     const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('素材无法加载：'+src)); i.src=src; });
     const fit = (ctx,img,x,y,w,h,cover=true) => { const r=cover?Math.max(w/img.width,h/img.height):Math.min(w/img.width,h/img.height); const nw=img.width*r,nh=img.height*r; ctx.drawImage(img,x+(w-nw)/2,y+(h-nh)/2,nw,nh); };
     let version='taobao'; const drawBg=(x,w,h)=>{ const img=version==='duoduo'?assets.ddBg:assets.bg, bs=+$('bgScale').value/100, r=Math.max(w/img.width,h/img.height)*bs, nw=img.width*r, nh=img.height*r; x.drawImage(img,(w-nw)/2,(h-nh)/2,nw,nh); };
@@ -201,8 +204,9 @@ $('wmY').addEventListener('input',()=>{ let v=+$('wmY').value; if(Math.abs(v)<=4
       $('status').textContent = '已打包 ZIP 开始下载';
     };
     $('tb').onclick=()=>{version='taobao';$('tb').classList.add('on');$('dd').classList.remove('on');drawAll();};$('dd').onclick=()=>{version='duoduo';$('dd').classList.add('on');$('tb').classList.remove('on');drawAll();};$('reset').onclick=init;
+    $('moldClear').onclick=()=>setMold('clear');$('moldCarbon').onclick=()=>setMold('carbon');
     $('usePin').onclick=()=>{ const u=$('pinUrl').value.trim(); if(!u){$('status').textContent='请先粘贴图片地址';return;} const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>{assets.art=img;drawAll();$('status').textContent='已应用图片';}; img.onerror=()=>{$('status').textContent='加载失败';}; img.src='https://images.weserv.nl/?url='+encodeURIComponent(u.replace(/^https?:\/\//,'')); }
-    async function init(){ try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=27'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ mold='clear';$('moldClear').classList.add('on');$('moldCarbon').classList.remove('on'); try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=27'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
