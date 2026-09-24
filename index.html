@@ -20,8 +20,9 @@
     .workspace { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px }.result { overflow:hidden; padding:14px }.result.wide { grid-column:span 2 }
     .result-head { display:flex; align-items:center; justify-content:space-between; margin:0 2px 11px }.result h3 { font-size:14px; margin:0 }.download { width:auto; padding:7px 10px; margin:0; font-size:12px; background:#eaf2ff; color:#245a9d }
     canvas { width:100%; max-width:400px; margin:0 auto; display:block; background:#f8f8f8; border-radius:10px; aspect-ratio:1; object-fit:contain }
-    .detail-scroll { height:780px; overflow-y:auto; border-radius:10px; background:#f8f8f8; border:1px solid #eef1f5 }
+    
     .detail-scroll canvas { max-width:none; width:100%; aspect-ratio:auto }
+    .detail-scroll { height:400px; overflow-y:auto; border-radius:10px; background:#f8f8f8; border:1px solid #eef1f5 } .detail-scroll canvas { max-width:none; width:100%; aspect-ratio:auto }
     /* 透明底预览：棋盘格表示该输出导出为无背景 PNG */
     #mockup { background:conic-gradient(#e6e8ec 0 25%, #ffffff 0 50%, #e6e8ec 0 75%, #ffffff 0) 0 0/22px 22px; }
     .status { font-size:12px; color:var(--muted); padding:5px 0 0 } @media(max-width:850px){main{grid-template-columns:1fr}.panel{position:static}.workspace{grid-template-columns:1fr}.result.wide{grid-column:auto}header{display:block}}
@@ -64,15 +65,16 @@
       <article class="result"><div class="result-head"><h3>02 · 白底产品图</h3><button class="download" data-out="white">下载</button></div><canvas id="white" width="1000" height="1000"></canvas></article>
       <article class="result"><div class="result-head"><h3>03 · 背景展示图</h3><button class="download" data-out="scene">下载</button></div><canvas id="scene" width="1000" height="1000"></canvas></article>
       <article class="result"><div class="result-head"><h3>04 · 正侧组合图</h3><button class="download" data-out="combo">下载</button></div><canvas id="combo" width="1000" height="1000"></canvas></article>
-      <article class="result wide"><div class="result-head"><h3>05 · 详情图</h3><button class="download" data-out="detail">下载</button></div><div class="detail-scroll"><canvas id="detail" width="1200" height="5615" style="aspect-ratio:auto"></canvas></div></article>
+      <article class="result"><div class="result-head"><h3>05 · 透视效果图</h3><button class="download" data-out="persp">下载</button></div><canvas id="persp" width="1000" height="1339"></canvas></article>
+      <article class="result"><div class="result-head"><h3>06 · 详情图</h3><button class="download" data-out="detail">下载</button></div><div class="detail-scroll"><canvas id="detail" width="1200" height="5615" style="aspect-ratio:auto"></canvas></div></article>
     </section>
   </main>
   <script src="jszip.min.js"></script>
   <script>
     const $ = id => document.getElementById(id), assets = {};
     const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'高反差.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png',innerShadow:'内阴影.png',ddBg:'多多背景图.png',ddDetail:'多多详情.png',wmT1:'t1.png',wmT2:'t2.png'};
-    let mold='clear'; const moldSets={ clear:{base:'素材底图.png',mask:'素材图片蒙版.png',side:'素材底图2.png',shadow:'高反差.png',detailBg:'详情底图.png'}, carbon:{base:'碳纤维模具/素材底图.png',mask:'碳纤维模具/素材图片蒙版.png',side:'碳纤维模具/素材底图2.png',shadow:'碳纤维模具/阴影.png',detailBg:'碳纤维模具/txq.png'} };
-    async function setMold(m){ mold=m; $('moldClear').classList.toggle('on',m==='clear'); $('moldCarbon').classList.toggle('on',m==='carbon'); $('status').textContent='正在加载'+(m==='carbon'?'碳纤维黑磨砂':'透明壳')+'模具素材…'; for(const k of ['base','mask','side','shadow','detailBg']) assets[k]=await load(moldSets[m][k]+'?v=27'); drawAll(); }
+    let mold='clear'; const moldSets={ clear:{base:'素材底图.png',mask:'素材图片蒙版.png',side:'素材底图2.png',shadow:'高反差.png',detailBg:'详情底图.png'}, carbon:{base:'碳纤维模具/素材底图.png',mask:'碳纤维模具/素材图片蒙版.png',side:'碳纤维模具/素材底图2.png',shadow:'碳纤维模具/阴影.png',detailBg:'碳纤维模具/txq.png',perspBg:'碳纤维模具/透视底.png',perspMaskL:'碳纤维模具/透视蒙版左.png',perspMaskR:'碳纤维模具/透视蒙版右.png',perspShadow:'碳纤维模具/透视阴影.png'} };
+    async function setMold(m){ mold=m; $('moldClear').classList.toggle('on',m==='clear'); $('moldCarbon').classList.toggle('on',m==='carbon'); $('status').textContent='正在加载'+(m==='carbon'?'碳纤维黑磨砂':'透明壳')+'模具素材…'; const keys=['base','mask','side','shadow','detailBg']; if(m==='carbon') keys.push('perspBg','perspMaskL','perspMaskR','perspShadow'); for(const k of keys) assets[k]=await load(moldSets[m][k]+'?v=29'); drawAll(); }
     const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('素材无法加载：'+src)); i.src=src; });
     const fit = (ctx,img,x,y,w,h,cover=true) => { const r=cover?Math.max(w/img.width,h/img.height):Math.min(w/img.width,h/img.height); const nw=img.width*r,nh=img.height*r; ctx.drawImage(img,x+(w-nw)/2,y+(h-nh)/2,nw,nh); };
     let version='taobao'; const drawBg=(x,w,h)=>{ const img=version==='duoduo'?assets.ddBg:assets.bg, bs=+$('bgScale').value/100, r=Math.max(w/img.width,h/img.height)*bs, nw=img.width*r, nh=img.height*r; x.drawImage(img,(w-nw)/2,(h-nh)/2,nw,nh); };
@@ -152,6 +154,19 @@
     function deviceShadow(ctx,size,opacity=.22,offsetY=Math.round(size*.032),x=0,y=0){ const s=silhouette(size);ctx.save();ctx.globalAlpha=opacity;ctx.shadowColor='rgba(18,38,58,1)';ctx.shadowBlur=size*.045;ctx.drawImage(s,x,y+offsetY,size,size);ctx.restore(); }
     function drawTo(id, painter){const c=$(id),x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.clearRect(0,0,c.width,c.height);painter(x,c.width,c.height);}
     function paintScaled(ctx,w,h,paint){ const scale=+$('overall').value/100;ctx.save();ctx.translate(w/2,h/2);ctx.scale(scale,scale);ctx.translate(-w/2,-h/2);paint();ctx.restore(); }
+    function maskOf(img,w,h){ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,w,h); const p=x.getImageData(0,0,w,h); for(let i=0;i<p.data.length;i+=4){const l=(p.data[i]+p.data[i+1]+p.data[i+2])/3;p.data[i+3]=Math.round(l*p.data[i+3]/255);p.data[i]=p.data[i+1]=p.data[i+2]=255;} x.putImageData(p,0,0); return c; }
+    function enhanceArt(img){ const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0); const p=x.getImageData(0,0,c.width,c.height),d=p.data; for(let i=0;i<d.length;i+=4){let r=d[i],g=d[i+1],b=d[i+2]; r=(r-128)*1.08+128; g=(g-128)*1.08+128; b=(b-128)*1.08+128; const gray=0.299*r+0.587*g+0.114*b; r=gray+(r-gray)*0.85; g=gray+(g-gray)*0.85; b=gray+(b-gray)*0.85; r*=0.95; g*=0.95; b*=0.95; d[i]=Math.max(0,Math.min(255,r)); d[i+1]=Math.max(0,Math.min(255,g)); d[i+2]=Math.max(0,Math.min(255,b));} x.putImageData(p,0,0); return c; }
+    function quadAffine(s,d){ const x1=s[0][0],y1=s[0][1],x2=s[1][0],y2=s[1][1],x3=s[2][0],y3=s[2][1], X1=d[0][0],Y1=d[0][1],X2=d[1][0],Y2=d[1][1],X3=d[2][0],Y3=d[2][1]; const den=x1*(y2-y3)+x2*(y3-y1)+x3*(y1-y2); return { a:(X1*(y2-y3)+X2*(y3-y1)+X3*(y1-y2))/den, b:(Y1*(y2-y3)+Y2*(y3-y1)+Y3*(y1-y2))/den, c:(X1*(x3-x2)+X2*(x1-x3)+X3*(x2-x1))/den, d:(Y1*(x3-x2)+Y2*(x1-x3)+Y3*(x2-x1))/den, e:(X1*(x2*y3-x3*y2)+X2*(x3*y1-x1*y3)+X3*(x1*y2-x2*y1))/den, f:(Y1*(x2*y3-x3*y2)+Y2*(x3*y1-x1*y3)+Y3*(x1*y2-x2*y1))/den }; }
+    function drawTri(ctx,img,s,d){ const m=quadAffine(s,d); ctx.save(); ctx.beginPath(); ctx.moveTo(d[0][0],d[0][1]); ctx.lineTo(d[1][0],d[1][1]); ctx.lineTo(d[2][0],d[2][1]); ctx.closePath(); ctx.clip(); ctx.transform(m.a,m.b,m.c,m.d,m.e,m.f); ctx.drawImage(img,0,0); ctx.restore(); }
+    function drawQuad(ctx,img,q){ const W=img.width,H=img.height; drawTri(ctx,img,[[0,0],[W,0],[0,H]],[q[0],q[1],q[3]]); drawTri(ctx,img,[[W,0],[W,H],[0,H]],[q[1],q[2],q[3]]); }
+    function perspQuad(ctx,art,q){ const xs=q.map(p=>p[0]),ys=q.map(p=>p[1]); const bx0=Math.min(...xs),bx1=Math.max(...xs),by0=Math.min(...ys),by1=Math.max(...ys); const r=Math.max((bx1-bx0)/art.width,(by1-by0)/art.height); const W=art.width*r,H=art.height*r; const tmp=document.createElement('canvas');tmp.width=Math.round(W);tmp.height=Math.round(H);const t=tmp.getContext('2d');t.drawImage(art,0,0,W,H); drawQuadPersp(ctx,tmp,q); }
+    function homographyMat(src,dst){ const A=[],b=[]; for(let k=0;k<4;k++){const x=src[k][0],y=src[k][1],X=dst[k][0],Y=dst[k][1]; A.push([x,y,1,0,0,0,-X*x,-X*y]);b.push(X); A.push([0,0,0,x,y,1,-Y*x,-Y*y]);b.push(Y);} for(let i=0;i<8;i++){let mx=i;for(let r=i+1;r<8;r++)if(Math.abs(A[r][i])>Math.abs(A[mx][i]))mx=r;const t=A[i];A[i]=A[mx];A[mx]=t;const tb=b[i];b[i]=b[mx];b[mx]=tb;const p=A[i][i];for(let j=i;j<8;j++)A[i][j]/=p;b[i]/=p;for(let r=0;r<8;r++)if(r!==i){const f=A[r][i];for(let j=i;j<8;j++)A[r][j]-=f*A[i][j];b[r]-=f*b[i];}} const h=b; return [[h[0],h[1],h[2]],[h[3],h[4],h[5]],[h[6],h[7],1]]; }
+    function applyH(H,x,y){ const den=H[2][0]*x+H[2][1]*y+H[2][2]; return [(H[0][0]*x+H[0][1]*y+H[0][2])/den,(H[1][0]*x+H[1][1]*y+H[1][2])/den]; }
+    function inv3(H){ const a=H[0][0],b=H[0][1],c=H[0][2],d=H[1][0],e=H[1][1],f=H[1][2],g=H[2][0],h=H[2][1],i=H[2][2]; const det=a*(e*i-f*h)-b*(d*i-f*g)+c*(d*h-e*g); if(Math.abs(det)<1e-12) return null; return [[(e*i-f*h)/det,(c*h-b*i)/det,(b*f-c*e)/det],[(f*g-d*i)/det,(a*i-c*g)/det,(c*d-a*f)/det],[(d*h-e*g)/det,(b*g-a*h)/det,(a*e-b*d)/det]]; }
+    function drawQuadPersp(ctx,img,q){ const W=img.width,H=img.height,Hm=homographyMat([[0,0],[W,0],[W,H],[0,H]],q),Hi=inv3(Hm); if(!Hi) return; const xs=q.map(p=>p[0]),ys=q.map(p=>p[1]); const x0=Math.max(0,Math.floor(Math.min(...xs))),x1=Math.min(ctx.canvas.width,Math.ceil(Math.max(...xs))),y0=Math.max(0,Math.floor(Math.min(...ys))),y1=Math.min(ctx.canvas.height,Math.ceil(Math.max(...ys))); const sctx=img.getContext('2d',{willReadFrequently:true}); const sd=sctx.getImageData(0,0,W,H).data; const imd=ctx.getImageData(x0,y0,x1-x0,y1-y0); const dd=imd.data; for(let Y=y0;Y<y1;Y++){ const rw=(Y-y0)*(x1-x0); for(let X=x0;X<x1;X++){ const den=Hi[2][0]*X+Hi[2][1]*Y+Hi[2][2]; const u=(Hi[0][0]*X+Hi[0][1]*Y+Hi[0][2])/den, v=(Hi[1][0]*X+Hi[1][1]*Y+Hi[1][2])/den; if(u<0||u>=W||v<0||v>=H) continue; const u0=Math.min(Math.floor(u),W-2),v0=Math.min(Math.floor(v),H-2),fu=u-u0,fv=v-v0; const i00=(v0*W+u0)*4,i10=i00+4,i01=i00+W*4,i11=i01+4,o=(rw+X-x0)*4; for(let cc=0;cc<4;cc++){ dd[o+cc]=sd[i00+cc]*(1-fu)*(1-fv)+sd[i10+cc]*fu*(1-fv)+sd[i01+cc]*(1-fu)*fv+sd[i11+cc]*fu*fv; } } } ctx.putImageData(imd,x0,y0); }
+    let perspLayerCache=null;
+    function perspMaskOf(img,w,h){ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,w,h); const p=x.getImageData(0,0,w,h); for(let i=0;i<p.data.length;i+=4){const l=(p.data[i]+p.data[i+1]+p.data[i+2])/3;p.data[i]=p.data[i+1]=p.data[i+2]=255;p.data[i+3]=l>128?255:0;} x.putImageData(p,0,0); return c; }
+    function drawPersp(){ const c=$('persp'), x=c.getContext('2d'); x.clearRect(0,0,c.width,c.height); if(mold!=='carbon'||!assets.perspBg){ x.fillStyle='#f1f3f6'; x.fillRect(0,0,c.width,c.height); x.fillStyle='#8a94a3'; x.font='18px "Microsoft YaHei"'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('透视效果图仅碳纤维黑磨砂模具可用',c.width/2,c.height/2); return; } x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high'; x.drawImage(assets.perspBg,0,0,c.width,c.height); if(!perspLayerCache||perspLayerCache.src!==assets.art.src){ const art=enhanceArt(assets.art); const LQ=[[9,73],[462,93],[644,926],[190,963]]; const RQ=[[522,353],[999,366],[753,1256],[273,1190]]; const lc=document.createElement('canvas');lc.width=c.width;lc.height=c.height;const lx=lc.getContext('2d'); perspQuad(lx,art,LQ); lx.globalCompositeOperation='destination-in'; lx.drawImage(perspMaskOf(assets.perspMaskL,c.width,c.height),0,0); lx.globalCompositeOperation='source-over'; const rc=document.createElement('canvas');rc.width=c.width;rc.height=c.height;const rx=rc.getContext('2d'); perspQuad(rx,art,RQ); rx.globalCompositeOperation='destination-in'; rx.drawImage(perspMaskOf(assets.perspMaskR,c.width,c.height),0,0); rx.globalCompositeOperation='source-over'; const layer=document.createElement('canvas');layer.width=c.width;layer.height=c.height;const l=layer.getContext('2d'); l.drawImage(lc,0,0); l.drawImage(rc,0,0); perspLayerCache={src:assets.art.src,layer}; } x.drawImage(perspLayerCache.layer,0,0); x.drawImage(assets.perspShadow,0,0,c.width,c.height); }
     function drawAll(){ if(Object.keys(assets).length<13)return; const dev=makeDevice(1000);
       // 真实效果图：保留壳体/贴图/光影渲染，但不铺背景，导出为透明底 PNG
       drawTo('mockup',(x,w,h)=>{paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
@@ -173,6 +188,7 @@
       if(version==='duoduo'){ x.drawImage(assets.ddDetail,0,0,w,h); const bs=1090*ov,nx=55+1090/2-bs/2+ox,ny=1235+1090/2-bs/2+oy; x.drawImage(dev,nx,ny,bs,bs); }
       else { x.drawImage(assets.detailBg,0,0,w,h); x.save(); x.translate(ox,oy); x.translate(600,2612); x.scale(ov,ov); x.translate(-600,-2612);
         x.drawImage(assets.side,464,206,148,1624,405,2290,60,656); x.drawImage(dev,297,2225,774,774); x.restore(); } });
+      drawPersp();
       const ds=document.querySelector('.detail-scroll'); if(ds){ const dh=ds.clientWidth*(dc.height)/1200; const cy=(version==='duoduo')?1700:2600; requestAnimationFrame(()=>{ ds.scrollTop=dh*(cy/dc.height)-ds.clientHeight/2; }); }
       $('status').textContent='已生成 · 可直接下载 PNG';
     }
@@ -189,14 +205,14 @@ $('wmY').addEventListener('input',()=>{ let v=+$('wmY').value; if(Math.abs(v)<=4
       });
     });
     $('saveAll').onclick = async () => {
-      const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']];
+      const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-透视效果图.png','persp'],['06-详情图.png','detail']];
       try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'});
         for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close();}
         $('status').textContent='已保存到所选文件夹';
       } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click();}); $('status').textContent='浏览器不支持文件夹选择，已改为逐张下载'; }
     };
     $('zipAll').onclick = async () => {
-      const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-详情图.png','detail']];
+      const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-透视效果图.png','persp'],['06-详情图.png','detail']];
       const zip = new JSZip();
       for(const [name,id] of files){ const blob = await new Promise(ok => $(id).toBlob(ok,'image/png')); zip.file(name, blob); }
       const content = await zip.generateAsync({type:'blob'});
@@ -206,7 +222,7 @@ $('wmY').addEventListener('input',()=>{ let v=+$('wmY').value; if(Math.abs(v)<=4
     $('tb').onclick=()=>{version='taobao';$('tb').classList.add('on');$('dd').classList.remove('on');drawAll();};$('dd').onclick=()=>{version='duoduo';$('dd').classList.add('on');$('tb').classList.remove('on');drawAll();};$('reset').onclick=init;
     $('moldClear').onclick=()=>setMold('clear');$('moldCarbon').onclick=()=>setMold('carbon');
     $('usePin').onclick=()=>{ const u=$('pinUrl').value.trim(); if(!u){$('status').textContent='请先粘贴图片地址';return;} const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>{assets.art=img;drawAll();$('status').textContent='已应用图片';}; img.onerror=()=>{$('status').textContent='加载失败';}; img.src='https://images.weserv.nl/?url='+encodeURIComponent(u.replace(/^https?:\/\//,'')); }
-    async function init(){ mold='clear';$('moldClear').classList.add('on');$('moldCarbon').classList.remove('on'); try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=27'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ mold='clear';$('moldClear').classList.add('on');$('moldCarbon').classList.remove('on'); try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=29'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
