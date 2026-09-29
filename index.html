@@ -74,7 +74,7 @@
     const $ = id => document.getElementById(id), assets = {};
     const defaults = {art:'参考图2.png',base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'高反差.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png',innerShadow:'内阴影.png',ddBg:'多多背景图.png',ddDetail:'多多详情.png',wmT1:'t1.png',wmT2:'t2.png'};
     let mold='clear'; const moldSets={ clear:{base:'素材底图.png',mask:'素材图片蒙版.png',side:'素材底图2.png',shadow:'高反差.png',detailBg:'详情底图.png'}, carbon:{base:'碳纤维模具/素材底图.png',mask:'碳纤维模具/素材图片蒙版.png',side:'碳纤维模具/素材底图2.png',shadow:'碳纤维模具/阴影.png',detailBg:'碳纤维模具/txq.png',perspBg:'碳纤维模具/透视底.png',perspMaskL:'碳纤维模具/透视蒙版左.png',perspMaskR:'碳纤维模具/透视蒙版右.png',perspShadow:'碳纤维模具/透视阴影.png'} };
-    async function setMold(m){ mold=m; $('moldClear').classList.toggle('on',m==='clear'); $('moldCarbon').classList.toggle('on',m==='carbon'); $('status').textContent='正在加载'+(m==='carbon'?'碳纤维黑磨砂':'透明壳')+'模具素材…'; const keys=['base','mask','side','shadow','detailBg']; if(m==='carbon') keys.push('perspBg','perspMaskL','perspMaskR','perspShadow'); for(const k of keys) assets[k]=await load(moldSets[m][k]+'?v=30'); drawAll(); }
+    async function setMold(m){ mold=m; $('moldClear').classList.toggle('on',m==='clear'); $('moldCarbon').classList.toggle('on',m==='carbon'); $('status').textContent='正在加载'+(m==='carbon'?'碳纤维黑磨砂':'透明壳')+'模具素材…'; const keys=['base','mask','side','shadow','detailBg']; if(m==='carbon') keys.push('perspBg','perspMaskL','perspMaskR','perspShadow'); for(const k of keys) assets[k]=await load(moldSets[m][k]+'?v=31'); drawAll(); }
     const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('素材无法加载：'+src)); i.src=src; });
     const fit = (ctx,img,x,y,w,h,cover=true) => { const r=cover?Math.max(w/img.width,h/img.height):Math.min(w/img.width,h/img.height); const nw=img.width*r,nh=img.height*r; ctx.drawImage(img,x+(w-nw)/2,y+(h-nh)/2,nw,nh); };
     let version='taobao'; const drawBg=(x,w,h)=>{ const img=version==='duoduo'?assets.ddBg:assets.bg, bs=+$('bgScale').value/100, r=Math.max(w/img.width,h/img.height)*bs, nw=img.width*r, nh=img.height*r; x.drawImage(img,(w-nw)/2,(h-nh)/2,nw,nh); };
@@ -102,8 +102,8 @@
         let r=d[i],g=d[i+1],b=d[i+2];
         r=(r-128)*1.08+128; g=(g-128)*1.08+128; b=(b-128)*1.08+128;
         const gray=0.299*r+0.587*g+0.114*b;
-        r=gray+(r-gray)*0.85; g=gray+(g-gray)*0.85; b=gray+(b-gray)*0.85;
-        r*=0.95; g*=0.95; b*=0.95;
+        r=gray+(r-gray)*0.95; g=gray+(g-gray)*0.95; b=gray+(b-gray)*0.95;
+        r*=1.0; g*=1.0; b*=1.0;
         d[i]=Math.max(0,Math.min(255,r)); d[i+1]=Math.max(0,Math.min(255,g)); d[i+2]=Math.max(0,Math.min(255,b));
       }
       x.putImageData(img,0,0); return c;
@@ -155,7 +155,7 @@
     function drawTo(id, painter){const c=$(id),x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.clearRect(0,0,c.width,c.height);painter(x,c.width,c.height);}
     function paintScaled(ctx,w,h,paint){ const scale=+$('overall').value/100;ctx.save();ctx.translate(w/2,h/2);ctx.scale(scale,scale);ctx.translate(-w/2,-h/2);paint();ctx.restore(); }
     function maskOf(img,w,h){ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,w,h); const p=x.getImageData(0,0,w,h); for(let i=0;i<p.data.length;i+=4){const l=(p.data[i]+p.data[i+1]+p.data[i+2])/3;p.data[i+3]=Math.round(l*p.data[i+3]/255);p.data[i]=p.data[i+1]=p.data[i+2]=255;} x.putImageData(p,0,0); return c; }
-    function enhanceArt(img){ const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0); const p=x.getImageData(0,0,c.width,c.height),d=p.data; for(let i=0;i<d.length;i+=4){let r=d[i],g=d[i+1],b=d[i+2]; r=(r-128)*1.08+128; g=(g-128)*1.08+128; b=(b-128)*1.08+128; const gray=0.299*r+0.587*g+0.114*b; r=gray+(r-gray)*1; g=gray+(g-gray)*1; b=gray+(b-gray)*1; r*=1; g*=1; b*=1; d[i]=Math.max(0,Math.min(255,r)); d[i+1]=Math.max(0,Math.min(255,g)); d[i+2]=Math.max(0,Math.min(255,b));} x.putImageData(p,0,0); return c; }
+    function enhanceArt(img){ const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0); const p=x.getImageData(0,0,c.width,c.height),d=p.data; for(let i=0;i<d.length;i+=4){let r=d[i],g=d[i+1],b=d[i+2]; r=(r-128)*1.08+128; g=(g-128)*1.08+128; b=(b-128)*1.08+128; const gray=0.299*r+0.587*g+0.114*b; r=gray+(r-gray)*0.85; g=gray+(g-gray)*0.85; b=gray+(b-gray)*0.85; r*=0.95; g*=0.95; b*=0.95; d[i]=Math.max(0,Math.min(255,r)); d[i+1]=Math.max(0,Math.min(255,g)); d[i+2]=Math.max(0,Math.min(255,b));} x.putImageData(p,0,0); return c; }
     function quadAffine(s,d){ const x1=s[0][0],y1=s[0][1],x2=s[1][0],y2=s[1][1],x3=s[2][0],y3=s[2][1], X1=d[0][0],Y1=d[0][1],X2=d[1][0],Y2=d[1][1],X3=d[2][0],Y3=d[2][1]; const den=x1*(y2-y3)+x2*(y3-y1)+x3*(y1-y2); return { a:(X1*(y2-y3)+X2*(y3-y1)+X3*(y1-y2))/den, b:(Y1*(y2-y3)+Y2*(y3-y1)+Y3*(y1-y2))/den, c:(X1*(x3-x2)+X2*(x1-x3)+X3*(x2-x1))/den, d:(Y1*(x3-x2)+Y2*(x1-x3)+Y3*(x2-x1))/den, e:(X1*(x2*y3-x3*y2)+X2*(x3*y1-x1*y3)+X3*(x1*y2-x2*y1))/den, f:(Y1*(x2*y3-x3*y2)+Y2*(x3*y1-x1*y3)+Y3*(x1*y2-x2*y1))/den }; }
     function drawTri(ctx,img,s,d){ const m=quadAffine(s,d); ctx.save(); ctx.beginPath(); ctx.moveTo(d[0][0],d[0][1]); ctx.lineTo(d[1][0],d[1][1]); ctx.lineTo(d[2][0],d[2][1]); ctx.closePath(); ctx.clip(); ctx.transform(m.a,m.b,m.c,m.d,m.e,m.f); ctx.drawImage(img,0,0); ctx.restore(); }
     function drawQuad(ctx,img,q){ const W=img.width,H=img.height; drawTri(ctx,img,[[0,0],[W,0],[0,H]],[q[0],q[1],q[3]]); drawTri(ctx,img,[[W,0],[W,H],[0,H]],[q[1],q[2],q[3]]); }
@@ -222,7 +222,7 @@ $('wmY').addEventListener('input',()=>{ let v=+$('wmY').value; if(Math.abs(v)<=4
     $('tb').onclick=()=>{version='taobao';$('tb').classList.add('on');$('dd').classList.remove('on');drawAll();};$('dd').onclick=()=>{version='duoduo';$('dd').classList.add('on');$('tb').classList.remove('on');drawAll();};$('reset').onclick=init;
     $('moldClear').onclick=()=>setMold('clear');$('moldCarbon').onclick=()=>setMold('carbon');
     $('usePin').onclick=()=>{ const u=$('pinUrl').value.trim(); if(!u){$('status').textContent='请先粘贴图片地址';return;} const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>{assets.art=img;drawAll();$('status').textContent='已应用图片';}; img.onerror=()=>{$('status').textContent='加载失败';}; img.src='https://images.weserv.nl/?url='+encodeURIComponent(u.replace(/^https?:\/\//,'')); }
-    async function init(){ mold='clear';$('moldClear').classList.add('on');$('moldCarbon').classList.remove('on'); try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=30'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    async function init(){ mold='clear';$('moldClear').classList.add('on');$('moldCarbon').classList.remove('on'); try { $('status').textContent='正在载入默认素材…'; for(const [k,v] of Object.entries(defaults))assets[k]=await load(v+'?v=31'); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
