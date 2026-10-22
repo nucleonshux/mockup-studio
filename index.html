@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>澹冲３ Mockup Studio</title>
+  <title>壳壳 Mockup Studio</title>
   <style>
     :root { --ink:#18212e; --muted:#6d7887; --paper:#f5f7fa; --accent:#ffbf1f; --card:#fff; }
     * { box-sizing:border-box } body { margin:0; font-family:"Microsoft YaHei",system-ui,sans-serif; background:var(--paper); color:var(--ink) }
@@ -23,59 +23,59 @@
     
     .detail-scroll canvas { max-width:none; width:100%; aspect-ratio:auto }
     .detail-scroll { height:400px; overflow-y:auto; border-radius:10px; background:#f8f8f8; border:1px solid #eef1f5 } .detail-scroll canvas { max-width:none; width:100%; aspect-ratio:auto }
-    /* 閫忔槑搴曢瑙堬細妫嬬洏鏍艰〃绀鸿杈撳嚭瀵煎嚭涓烘棤鑳屾櫙 PNG */
+    /* 透明底预览：棋盘格表示该输出导出为无背景 PNG */
     #mockup { background:conic-gradient(#e6e8ec 0 25%, #ffffff 0 50%, #e6e8ec 0 75%, #ffffff 0) 0 0/22px 22px; }
     .status { font-size:12px; color:var(--muted); padding:5px 0 0 } @media(max-width:850px){main{grid-template-columns:1fr}.panel{position:static}.workspace{grid-template-columns:1fr}.result.wide{grid-column:auto}header{display:block}}
   </style>
 </head>
 <body>
-  <header><div><h1>澹冲３ Mockup Studio</h1><p>鏇挎崲绱犳潗鍚庯紝涓€閿敓鎴愮湡瀹炶创鍥炬晥鏋滀笌涓夌灞曠ず鍥?/p></div><div class="status" id="status">姝ｅ湪杞藉叆榛樿绱犳潗鈥?/div></header>
+  <header><div><h1>壳壳 Mockup Studio</h1><p>替换素材后，一键生成真实贴图效果与三种展示图</p></div><div class="status" id="status">正在载入默认素材…</div></header>
   <main>
     <aside class="panel">
-      <h2>绱犳潗涓庢ā鏉?/h2>
-      <div style="display:flex;gap:10px;margin-bottom:2px"><button id="moldClear" class="secondary on" style="margin-top:0">閫忔槑澹?/button><button id="moldCarbon" class="secondary" style="margin-top:0">纰崇氦缁撮粦纾ㄧ爞</button></div>
-      <div class="field"><label>璁捐绱犳潗鍥?/label><input id="art" type="file" accept="image/*"></div>
-      <div class="field"><label>澹充綋搴曞浘</label><input id="base" type="file" accept="image/*"></div>
-      <div class="field"><label>澹充綋钂欑増</label><input id="mask" type="file" accept="image/*"></div>
-      <div class="field"><label>绾告劅鍣０</label><input id="noise" type="file" accept="image/*"></div>
-      <div class="field"><label>灞曠ず鑳屾櫙</label><input id="bg" type="file" accept="image/*"></div>
-      <div class="field"><label>渚ч潰澹充綋</label><input id="side" type="file" accept="image/*"></div>
-      <div class="field"><label>姘村嵃鍥剧墖</label><input id="watermark" type="file" accept="image/*"></div>
-      <div class="field"><label>姘村嵃閫忔槑搴?/label><input id="wmOpacity" type="range" min="0" max="100" value="0"><div class="range-row"><span>0%</span><span id="wmOpacityText">0%</span><span>100%</span></div></div>
-      <div class="field"><label>姘村嵃姘村钩</label><input id="wmX" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="wmXText">0</span><span>+200</span></div></div>
-      <div class="field"><label>姘村嵃鍨傜洿</label><input id="wmY" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="wmYText">0</span><span>+200</span></div></div>
-      <div class="field"><label>姘村嵃澶у皬</label><input id="wmSize" type="range" min="10" max="200" value="60"><div class="range-row"><span>10%</span><span id="wmSizeText">60%</span><span>200%</span></div></div>
-      <div class="field"><label>绱犳潗缂╂斁</label><input id="scale" type="range" min="85" max="125" value="100"><div class="range-row"><span>85%</span><span id="scaleText">100%</span><span>125%</span></div></div>
-      <div class="field"><label>绱犳潗涓婁笅浣嶇疆</label><input id="offset" type="range" min="-12" max="12" value="0"><div class="range-row"><span>涓婄Щ</span><span id="offsetText">0%</span><span>涓嬬Щ</span></div></div>
-      <div class="field"><label>绾告劅寮哄害</label><input id="grain" type="range" min="0" max="55" value="0"><div class="range-row"><span>骞虫粦</span><span id="grainText">0%</span><span>棰楃矑</span></div></div>
-      <div class="field"><label>鏁翠綋缂╂斁</label><input id="overall" type="range" min="70" max="100" value="93"><div class="range-row"><span>70%</span><span id="overallText">93%</span><span>100%</span></div></div>
-      <div class="field"><label>鑳屾櫙鍥剧缉鏀?/label><input id="bgScale" type="range" min="50" max="200" value="100"><div class="range-row"><span>50%</span><span id="bgScaleText">100%</span><span>200%</span></div></div>
-      <div class="field"><label>璇︽儏澹虫按骞?/label><input id="detailX" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="detailXText">0</span><span>+200</span></div></div>
-      <div class="field"><label>璇︽儏澹冲瀭鐩?/label><input id="detailY" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="detailYText">0</span><span>+200</span></div></div>
-      <div style="display:flex;gap:10px;margin-top:12px"><button id="tb" class="secondary on" style="margin-top:0">娣樺疂鐗?/button><button id="dd" class="secondary" style="margin-top:0">澶氬鐗?/button></div><button id="saveAll" class="secondary">涓€閿繚瀛樺叏閮ㄥ埌鏂囦欢澶?/button><button id="zipAll" class="secondary">鎵撳寘涓嬭浇 ZIP</button><button class="secondary" id="reset">鎭㈠榛樿绱犳潗</button>
-      <div class="tips">鎻愮ず锛氳璁＄浼氭寜澹充綋鍗板埛鍖虹瓑姣斺€滈摵婊♀€濓紙瓒呭嚭鐭竟鑷姩瑁佸垏锛夛紝鍥炬鍙細鍑虹幇鍦ㄨ挋鐗堢櫧鑹插尯鍩熴€傚３浣撱€佽挋鐗堜笌鍣０闇€浣跨敤鍚屼竴妯℃澘灏哄銆?/div>
-      <div class="field"><label>浠?Pinterest 鎵惧浘</label>
-        <button id="openPin" style="margin-top:0;background:#eaf2ff;color:#245a9d">鎵撳紑 Pinterest 娴忚</button>
-        <input id="pinUrl" type="text" placeholder="鍦ㄥ浘涓婂彸閿啋澶嶅埗鍥剧墖鍦板潃锛岀矘璐村埌杩欓噷" style="width:100%;margin-top:8px;font-size:12px;padding:8px;border:1px solid #d8dde4;border-radius:8px">
-        <button id="usePin" style="margin-top:8px">棰勮姝ゅ浘</button>
+      <h2>素材与模板</h2>
+      <div style="display:flex;gap:10px;margin-bottom:2px"><button id="moldClear" class="secondary on" style="margin-top:0">透明壳</button><button id="moldCarbon" class="secondary" style="margin-top:0">碳纤维黑磨砂</button></div>
+      <div class="field"><label>设计素材图</label><input id="art" type="file" accept="image/*"></div>
+      <div class="field"><label>壳体底图</label><input id="base" type="file" accept="image/*"></div>
+      <div class="field"><label>壳体蒙版</label><input id="mask" type="file" accept="image/*"></div>
+      <div class="field"><label>纸感噪声</label><input id="noise" type="file" accept="image/*"></div>
+      <div class="field"><label>展示背景</label><input id="bg" type="file" accept="image/*"></div>
+      <div class="field"><label>侧面壳体</label><input id="side" type="file" accept="image/*"></div>
+      <div class="field"><label>水印图片</label><input id="watermark" type="file" accept="image/*"></div>
+      <div class="field"><label>水印透明度</label><input id="wmOpacity" type="range" min="0" max="100" value="0"><div class="range-row"><span>0%</span><span id="wmOpacityText">0%</span><span>100%</span></div></div>
+      <div class="field"><label>水印水平</label><input id="wmX" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="wmXText">0</span><span>+200</span></div></div>
+      <div class="field"><label>水印垂直</label><input id="wmY" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="wmYText">0</span><span>+200</span></div></div>
+      <div class="field"><label>水印大小</label><input id="wmSize" type="range" min="10" max="200" value="60"><div class="range-row"><span>10%</span><span id="wmSizeText">60%</span><span>200%</span></div></div>
+      <div class="field"><label>素材缩放</label><input id="scale" type="range" min="85" max="125" value="100"><div class="range-row"><span>85%</span><span id="scaleText">100%</span><span>125%</span></div></div>
+      <div class="field"><label>素材上下位置</label><input id="offset" type="range" min="-12" max="12" value="0"><div class="range-row"><span>上移</span><span id="offsetText">0%</span><span>下移</span></div></div>
+      <div class="field"><label>纸感强度</label><input id="grain" type="range" min="0" max="55" value="0"><div class="range-row"><span>平滑</span><span id="grainText">0%</span><span>颗粒</span></div></div>
+      <div class="field"><label>整体缩放</label><input id="overall" type="range" min="70" max="100" value="93"><div class="range-row"><span>70%</span><span id="overallText">93%</span><span>100%</span></div></div>
+      <div class="field"><label>背景图缩放</label><input id="bgScale" type="range" min="50" max="200" value="100"><div class="range-row"><span>50%</span><span id="bgScaleText">100%</span><span>200%</span></div></div>
+      <div class="field"><label>详情壳水平</label><input id="detailX" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="detailXText">0</span><span>+200</span></div></div>
+      <div class="field"><label>详情壳垂直</label><input id="detailY" type="range" min="-200" max="200" value="0" step="1"><div class="range-row"><span>-200</span><span id="detailYText">0</span><span>+200</span></div></div>
+      <div style="display:flex;gap:10px;margin-top:12px"><button id="tb" class="secondary on" style="margin-top:0">淘宝版</button><button id="dd" class="secondary" style="margin-top:0">多多版</button></div><button id="saveAll" class="secondary">一键保存全部到文件夹</button><button id="zipAll" class="secondary">打包下载 ZIP</button><button class="secondary" id="reset">恢复默认素材</button>
+      <div class="tips">提示：设计稿会按壳体印刷区等比“铺满”（超出短边自动裁切），图案只会出现在蒙版白色区域。壳体、蒙版与噪声需使用同一模板尺寸。</div>
+      <div class="field"><label>从 Pinterest 找图</label>
+        <button id="openPin" style="margin-top:0;background:#eaf2ff;color:#245a9d">打开 Pinterest 浏览</button>
+        <input id="pinUrl" type="text" placeholder="在图上右键→复制图片地址，粘贴到这里" style="width:100%;margin-top:8px;font-size:12px;padding:8px;border:1px solid #d8dde4;border-radius:8px">
+        <button id="usePin" style="margin-top:8px">预览此图</button>
       </div>
     </aside>
     <section class="workspace">
-      <article class="result"><div class="result-head"><h3>01 路 鐪熷疄鏁堟灉鍥?/h3><button class="download" data-out="mockup">涓嬭浇</button></div><canvas id="mockup" width="1000" height="1000"></canvas></article>
-      <article class="result"><div class="result-head"><h3>02 路 鐧藉簳浜у搧鍥?/h3><button class="download" data-out="white">涓嬭浇</button></div><canvas id="white" width="1000" height="1000"></canvas></article>
-      <article class="result"><div class="result-head"><h3>03 路 鑳屾櫙灞曠ず鍥?/h3><button class="download" data-out="scene">涓嬭浇</button></div><canvas id="scene" width="1000" height="1000"></canvas></article>
-      <article class="result"><div class="result-head"><h3>04 路 姝ｄ晶缁勫悎鍥?/h3><button class="download" data-out="combo">涓嬭浇</button></div><canvas id="combo" width="1000" height="1000"></canvas></article>
-      <article class="result"><div class="result-head"><h3>05 路 鐭鎯?/h3><button class="download" data-out="short">涓嬭浇</button></div><div class="detail-scroll"><canvas id="short" width="1200" height="3600" style="aspect-ratio:auto"></canvas></div></article>
-      <article class="result"><div class="result-head"><h3>06 路 璇︽儏鍥?/h3><button class="download" data-out="detail">涓嬭浇</button></div><div class="detail-scroll" id="detailScroll"><canvas id="detail" width="1200" height="5615" style="aspect-ratio:auto"></canvas></div></article>
+      <article class="result"><div class="result-head"><h3>01 · 真实效果图</h3><button class="download" data-out="mockup">下载</button></div><canvas id="mockup" width="1000" height="1000"></canvas></article>
+      <article class="result"><div class="result-head"><h3>02 · 白底产品图</h3><button class="download" data-out="white">下载</button></div><canvas id="white" width="1000" height="1000"></canvas></article>
+      <article class="result"><div class="result-head"><h3>03 · 背景展示图</h3><button class="download" data-out="scene">下载</button></div><canvas id="scene" width="1000" height="1000"></canvas></article>
+      <article class="result"><div class="result-head"><h3>04 · 正侧组合图</h3><button class="download" data-out="combo">下载</button></div><canvas id="combo" width="1000" height="1000"></canvas></article>
+      <article class="result"><div class="result-head"><h3>05 · 短详情</h3><button class="download" data-out="short">下载</button></div><div class="detail-scroll"><canvas id="short" width="1200" height="3600" style="aspect-ratio:auto"></canvas></div></article>
+      <article class="result"><div class="result-head"><h3>06 · 详情图</h3><button class="download" data-out="detail">下载</button></div><div class="detail-scroll" id="detailScroll"><canvas id="detail" width="1200" height="5615" style="aspect-ratio:auto"></canvas></div></article>
     </section>
   </main>
   <script src="jszip.min.js"></script>
   <script>
     const $ = id => document.getElementById(id), assets = {};
-    const defaults = {base:'绱犳潗搴曞浘.png',mask:'绱犳潗鍥剧墖钂欑増.png',noise:'绱犳潗鍥剧墖鍣０.png',shadow:'楂樺弽宸?png',bg:'鑳屾櫙鍥?png',side:'绱犳潗搴曞浘2.png',detailBg:'璇︽儏搴曞浘.png',innerShadow:'鍐呴槾褰?png',ddBg:'澶氬鑳屾櫙鍥?png',ddDetail:'澶氬璇︽儏.png',wmT1:'t1.png',wmT2:'t2.png',whiteBg:'鐧藉簳鍥緓.png',shortBg:'纰崇氦缁存ā鍏?dtxq.png'};
-    let mold='clear'; const moldSets={ clear:{base:'绱犳潗搴曞浘.png',mask:'绱犳潗鍥剧墖钂欑増.png',side:'绱犳潗搴曞浘2.png',shadow:'楂樺弽宸?png',detailBg:'璇︽儏搴曞浘.png'}, carbon:{base:'纰崇氦缁存ā鍏?绱犳潗搴曞浘.png',mask:'纰崇氦缁存ā鍏?绱犳潗鍥剧墖钂欑増.png',side:'纰崇氦缁存ā鍏?绱犳潗搴曞浘2.png',shadow:'纰崇氦缁存ā鍏?闃村奖.png',detailBg:'纰崇氦缁存ā鍏?txq.png',perspBg:'纰崇氦缁存ā鍏?閫忚搴?png',perspMaskL:'纰崇氦缁存ā鍏?閫忚钂欑増宸?png',perspMaskR:'纰崇氦缁存ā鍏?閫忚钂欑増鍙?png',perspShadow:'纰崇氦缁存ā鍏?閫忚闃村奖.png'} };
-    async function setMold(m){ mold=m; $('moldClear').classList.toggle('on',m==='clear'); $('moldCarbon').classList.toggle('on',m==='carbon'); if(m==='carbon'){ $('scale').value=95; $('scaleText').textContent='95%'; $('offset').value=5; $('offsetText').textContent='5%'; } else { $('scale').value=100; $('scaleText').textContent='100%'; $('offset').value=0; $('offsetText').textContent='0%'; } $('status').textContent='姝ｅ湪鍔犺浇'+(m==='carbon'?'纰崇氦缁撮粦纾ㄧ爞':'閫忔槑澹?)+'妯″叿绱犳潗鈥?; const keys=['base','mask','side','shadow','detailBg']; if(m==='carbon') keys.push('perspBg','perspMaskL','perspMaskR','perspShadow'); await Promise.all(keys.map(async k=>{ assets[k]=await load(moldSets[m][k]+'?v=37'); })); drawAll(); }
-    const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('绱犳潗鏃犳硶鍔犺浇锛?+src)); i.src=src; });
+    const defaults = {base:'素材底图.png',mask:'素材图片蒙版.png',noise:'素材图片噪声.png',shadow:'高反差.png',bg:'背景图.png',side:'素材底图2.png',detailBg:'详情底图.png',innerShadow:'内阴影.png',ddBg:'多多背景图.png',ddDetail:'多多详情.png',wmT1:'t1.png',wmT2:'t2.png',whiteBg:'白底图x.png',shortBg:'碳纤维模具/dtxq.png'};
+    let mold='clear'; const moldSets={ clear:{base:'素材底图.png',mask:'素材图片蒙版.png',side:'素材底图2.png',shadow:'高反差.png',detailBg:'详情底图.png'}, carbon:{base:'碳纤维模具/素材底图.png',mask:'碳纤维模具/素材图片蒙版.png',side:'碳纤维模具/素材底图2.png',shadow:'碳纤维模具/阴影.png',detailBg:'碳纤维模具/txq.png',perspBg:'碳纤维模具/透视底.png',perspMaskL:'碳纤维模具/透视蒙版左.png',perspMaskR:'碳纤维模具/透视蒙版右.png',perspShadow:'碳纤维模具/透视阴影.png'} };
+    async function setMold(m){ mold=m; $('moldClear').classList.toggle('on',m==='clear'); $('moldCarbon').classList.toggle('on',m==='carbon'); if(m==='carbon'){ $('scale').value=95; $('scaleText').textContent='95%'; $('offset').value=5; $('offsetText').textContent='5%'; } else { $('scale').value=100; $('scaleText').textContent='100%'; $('offset').value=0; $('offsetText').textContent='0%'; } $('status').textContent='正在加载'+(m==='carbon'?'碳纤维黑磨砂':'透明壳')+'模具素材…'; const keys=['base','mask','side','shadow','detailBg']; if(m==='carbon') keys.push('perspBg','perspMaskL','perspMaskR','perspShadow'); await Promise.all(keys.map(async k=>{ assets[k]=await load(moldSets[m][k]+'?v=37'); })); drawAll(); }
+    const load = src => new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>no(new Error('素材无法加载：'+src)); i.src=src; });
     const fit = (ctx,img,x,y,w,h,cover=true) => { const r=cover?Math.max(w/img.width,h/img.height):Math.min(w/img.width,h/img.height); const nw=img.width*r,nh=img.height*r; ctx.drawImage(img,x+(w-nw)/2,y+(h-nh)/2,nw,nh); };
     let version='taobao'; const drawBg=(x,w,h)=>{ const img=version==='duoduo'?assets.ddBg:assets.bg, bs=+$('bgScale').value/100, r=Math.max(w/img.width,h/img.height)*bs, nw=img.width*r, nh=img.height*r; x.drawImage(img,(w-nw)/2,(h-nh)/2,nw,nh); };
     // The supplied mask uses solid black pixels for lens holes (rather than transparent pixels).
@@ -86,7 +86,7 @@
     }
     function silhouette(size){ const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');x.drawImage(assets.shadow,0,0,size,size);x.globalCompositeOperation='source-in';x.fillStyle='#142030';x.fillRect(0,0,size,size);return c; }
     async function setFile(key,file){ assets[key]=await load(URL.createObjectURL(file)); drawAll(); }
-    // Measured from the supplied 1000px template: the printable case area is x:302鈥?98, y:80鈥?18.
+    // Measured from the supplied 1000px template: the printable case area is x:302–698, y:80–918.
     // Artwork is fitted to this tall rectangle (not the square canvas), preserving its ratio.
     const printable = { x:.302, y:.080, w:.396, h:.838 };
     function artLayer(size=1600){
@@ -96,7 +96,7 @@
       const r=Math.max(area.w/assets.art.width,area.h/assets.art.height)*sc, w=assets.art.width*r,h=assets.art.height*r;
       const shift=+$('offset').value/100*area.h;
       x.drawImage(assets.art,area.x+(area.w-w)/2,area.y+(area.h-h)/2+shift,w,h);
-      // 澧炲己璁捐绋匡細瀵规瘮搴?楗卞拰搴︼紝杞诲井鍘嬫殫锛屾姷娑堢僵灞傚彂鐏?
+      // 增强设计稿：对比度+饱和度，轻微压暗，抵消罩层发灰
       const img=x.getImageData(0,0,size,size), d=img.data;
       for(let i=0;i<d.length;i+=4){
         let r=d[i],g=d[i+1],b=d[i+2];
@@ -122,10 +122,10 @@
       const baseLight=document.createElement('canvas');baseLight.width=baseLight.height=size;const b=baseLight.getContext('2d');b.imageSmoothingEnabled=true;b.imageSmoothingQuality='high';b.drawImage(assets.shadow,0,0,size,size);
       b.globalCompositeOperation='destination-in';b.drawImage(alphaMask,0,0);
       x.save();x.globalCompositeOperation='hard-light';x.globalAlpha=.85;x.drawImage(baseLight,0,0);x.restore();
-      // 鍐呴槾褰憋細鐢ㄨ挋鐗堣鍑哄彲鍗板尯锛宮ultiply 鍘嬫殫澹宠竟杞姌
+      // 内阴影：用蒙版裁出可印区，multiply 压暗壳边转折
       const innerSh=document.createElement('canvas');innerSh.width=innerSh.height=size;const is=innerSh.getContext('2d');is.imageSmoothingEnabled=true;is.imageSmoothingQuality='high';is.drawImage(assets.innerShadow,0,0,size,size);is.globalCompositeOperation='destination-in';is.drawImage(alphaMask,0,0);
       x.save();x.globalCompositeOperation='multiply';x.globalAlpha=.30;x.drawImage(innerSh,0,0);x.restore();
-      // 浠庝笂鍒颁笅鐨勬煍鍜屽弽鍏夛紙screen锛屽彧鎻愪寒锛?
+      // 从上到下的柔和反光（screen，只提亮）
       const sheen=document.createElement('canvas');sheen.width=sheen.height=size;const sn=sheen.getContext('2d');let sg=sn.createLinearGradient(0,0,0,size);sg.addColorStop(0,'rgba(255,255,255,.20)');sg.addColorStop(.35,'rgba(255,255,255,0)');sg.addColorStop(1,'rgba(255,255,255,0)');sn.fillStyle=sg;sn.fillRect(0,0,size,size);sn.globalCompositeOperation='destination-in';sn.drawImage(alphaMask,0,0);
       x.save();x.globalCompositeOperation='screen';x.globalAlpha=.6;x.drawImage(sheen,0,0);x.restore();
       // Restore pixels outside the printable (white) mask: lenses, flash and transparent exterior.
@@ -136,7 +136,7 @@
       g=l.createLinearGradient(0,0,0,size);g.addColorStop(0,'rgba(255,255,255,.09)');g.addColorStop(.68,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.07)');l.fillStyle=g;l.fillRect(0,0,size,size);
       const cx=.47*size,cy=.255*size;g=l.createRadialGradient(cx,cy,size*.03,cx,cy,size*.19);g.addColorStop(0,'rgba(0,0,0,.08)');g.addColorStop(1,'rgba(0,0,0,0)');l.fillStyle=g;l.fillRect(0,0,size,size);
       l.globalCompositeOperation='destination-in';l.drawImage(alphaMask,0,0);x.save();x.globalCompositeOperation='multiply';x.drawImage(light,0,0);x.restore();x.save();x.globalCompositeOperation='screen';x.globalAlpha=.18;x.drawImage(light,0,0);x.restore();
-      // 姘村嵃灞傦細鎸夐€忔槑搴?浣嶇疆/澶у皬锛屽彔鍦ㄥ嵃鍒峰尯骞惰钂欑増瑁佹帀
+      // 水印层：按透明度/位置/大小，叠在印刷区并被蒙版裁掉
       const wmImg = assets.wmCustom || (version==='duoduo'?assets.wmT2:assets.wmT1);
       if(wmImg && +$('wmOpacity').value>0){ const wm=document.createElement('canvas');wm.width=wm.height=size;const wc=wm.getContext('2d');wc.imageSmoothingEnabled=true;wc.imageSmoothingQuality='high';
         const pw=printable.w*size, ph=printable.h*size, pcx=(printable.x+printable.w/2)*size, pcy=(printable.y+printable.h/2)*size;
@@ -167,30 +167,30 @@
     let perspLayerCache=null;
     function perspMaskOf(img,w,h){ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,w,h); const p=x.getImageData(0,0,w,h); for(let i=0;i<p.data.length;i+=4){const l=(p.data[i]+p.data[i+1]+p.data[i+2])/3;p.data[i]=p.data[i+1]=p.data[i+2]=255;p.data[i+3]=l>128?255:0;} x.putImageData(p,0,0); return c; }
     function drawShortDetail(dev){ const c=$('short'), x=c.getContext('2d'); x.clearRect(0,0,c.width,c.height);
-      if(!assets.shortBg){ x.fillStyle='#f1f3f6'; x.fillRect(0,0,c.width,c.height); x.fillStyle='#8a94a3'; x.font='18px "Microsoft YaHei"'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('鐭鎯呰儗鏅湭鍔犺浇',c.width/2,c.height/2); return; }
+      if(!assets.shortBg){ x.fillStyle='#f1f3f6'; x.fillRect(0,0,c.width,c.height); x.fillStyle='#8a94a3'; x.font='18px "Microsoft YaHei"'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('短详情背景未加载',c.width/2,c.height/2); return; }
       x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high'; x.drawImage(assets.shortBg,0,0,c.width,c.height);
-      // 閿氱偣绮剧‘鏄犲皠锛堜袱鑳屾櫙鍚屾瀯锛夛細dtxq鑹插樊鏉′腑蹇?22+512=1434锛沀V鍗板埛涓績1418+16=1434锛涘３涓績x=684
+      // 锚点精确映射（两背景同构）：dtxq色差条中心922+512=1434；UV印刷中心1418+16=1434；壳中心x=684
       const ov=+$('overall').value/100;
       x.save(); x.translate(600,1434); x.scale(ov,ov); x.translate(-600,-1434);
       x.drawImage(assets.side,464,206,148,1624, 405,1112,60,656);
       x.drawImage(dev, 297,1047,774,774);
       x.restore(); }
     function drawAll(){ if(Object.keys(assets).length<13)return; const dev=makeDevice(1000);
-      // 鐪熷疄鏁堟灉鍥撅細淇濈暀澹充綋/璐村浘/鍏夊奖娓叉煋锛屼絾涓嶉摵鑳屾櫙锛屽鍑轰负閫忔槑搴?PNG
+      // 真实效果图：保留壳体/贴图/光影渲染，但不铺背景，导出为透明底 PNG
       drawTo('mockup',(x,w,h)=>{paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
       // Full-size placement matches the supplied 2000px reference compositions.
       drawTo('white',(x,w,h)=>{x.drawImage(assets.whiteBg,0,0,w,h);paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
       drawTo('scene',(x,w,h)=>{drawBg(x,w,h);paintScaled(x,w,h,()=>x.drawImage(dev,0,0,w,h))});
-      // 姝ｄ晶缁勫悎鍥撅紙鍙傝€冨浘4 鐗堝紡锛?000px 鐢诲竷锛夛細宸︿晶杈规潯 + 鍙充晶姝ｉ潰锛岀瓑楂樺苟鎺掋€?
-      // 绱犳潗搴曞浘2.png 涓?2000px锛屼晶杈瑰３浣撳湪婧愬浘 x464..612銆亂206..1830锛堝叾浣欓€忔槑锛夈€?
-      // 渚ц竟澹?y104..934锛堥珮830锛夛紱姝ｉ潰澹崇缉鍒?956 鍚?y104..934锛屼笌渚ц竟涓婁笅瀵归綈銆?
-      // dev(1000) 鍐呮闈㈠３ y84..952锛涚缉鏀?830/868鈮?.956锛岀敾 956x956 浜?104,24)銆?
+      // 正侧组合图（参考图4 版式，1000px 画布）：左侧边条 + 右侧正面，等高并排。
+      // 素材底图2.png 为 2000px，侧边壳体在源图 x464..612、y206..1830（其余透明）。
+      // 侧边壳 y104..934（高830）；正面壳缩到 956 后 y104..934，与侧边上下对齐。
+      // dev(1000) 内正面壳 y84..952；缩放 830/868≈0.956，画 956x956 于(104,24)。
       drawTo('combo',(x,w,h)=>{drawBg(x,w,h);paintScaled(x,w,h,()=>{
         x.drawImage(assets.side, 464,206,148,1624, 236,104,75,820);
         x.drawImage(dev,101,23,967,967);
       })});
-      // 05 璇︽儏鍥撅細璇︽儏搴曞浘(1200x5615) + 姝ｄ晶缁勫悎鍥炬寜鍙傝€冨浘6浣嶇疆(216,2207,800x800)鍙犳斁
-      // 05 璇︽儏鍥撅細鎸夌増鏈€夊簳鍥句笌浜у搧浣嶇疆
+      // 05 详情图：详情底图(1200x5615) + 正侧组合图按参考图6位置(216,2207,800x800)叠放
+      // 05 详情图：按版本选底图与产品位置
       const dc=$('detail'); dc.height = (version==='duoduo')?3400:5615;
       drawTo('detail',(x,w,h)=>{ const ov=+$('overall').value/100, ox=+$('detailX').value, oy=+$('detailY').value;
       if(version==='duoduo'){ x.drawImage(assets.ddDetail,0,0,w,h); const bs=1090*ov,nx=55+1090/2-bs/2+ox,ny=1235+1090/2-bs/2+oy; x.drawImage(dev,nx,ny,bs,bs); }
@@ -198,7 +198,7 @@
         x.drawImage(assets.side,464,206,148,1624,405,2290,60,656); x.drawImage(dev,297,2225,774,774); x.restore(); } });
       drawShortDetail(dev);
       const ds=document.getElementById('detailScroll'); if(ds){ const dh=ds.clientWidth*(dc.height)/1200; const cy=(version==='duoduo')?1700:2600; requestAnimationFrame(()=>{ ds.scrollTop=dh*(cy/dc.height)-ds.clientHeight/2; }); }
-      $('status').textContent='宸茬敓鎴?路 鍙洿鎺ヤ笅杞?PNG';
+      $('status').textContent='已生成 · 可直接下载 PNG';
     }
     ['art','base','mask','noise','bg','side'].forEach(k=>$(k).addEventListener('change',e=>e.target.files[0]&&setFile(k,e.target.files[0])));
 $('watermark').addEventListener('change',e=>{ if(e.target.files[0]){ setFile('wmCustom',e.target.files[0]); } });
@@ -214,24 +214,24 @@ $('wmY').addEventListener('input',()=>{ let v=+$('wmY').value; if(Math.abs(v)<=4
     });
     document.querySelectorAll('.download').forEach(b=>b.onclick=()=>{const a=document.createElement('a');a.download='mockup-'+b.dataset.out+'.png';a.href=$(b.dataset.out).toDataURL('image/png');a.click()});
     $('saveAll').onclick = async () => {
-      const files=[['01-鐪熷疄鏁堟灉鍥?png','mockup'],['02-鐧藉簳浜у搧鍥?png','white'],['03-鑳屾櫙灞曠ず鍥?png','scene'],['04-姝ｄ晶缁勫悎鍥?png','combo'],['05-鐭鎯?png','short'],['06-璇︽儏鍥?png','detail']];
+      const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-短详情.png','short'],['06-详情图.png','detail']];
       try { if(!window.showDirectoryPicker) throw new Error('unsupported'); const folder=await window.showDirectoryPicker({mode:'readwrite'});
         for(const [name,id] of files){const handle=await folder.getFileHandle(name,{create:true});const writer=await handle.createWritable();const blob=await new Promise(ok=>$(id).toBlob(ok,'image/png'));await writer.write(blob);await writer.close();}
-        $('status').textContent='宸蹭繚瀛樺埌鎵€閫夋枃浠跺す';
-      } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click();}); $('status').textContent='娴忚鍣ㄤ笉鏀寔鏂囦欢澶归€夋嫨锛屽凡鏀逛负閫愬紶涓嬭浇'; }
+        $('status').textContent='已保存到所选文件夹';
+      } catch(e) { if(e.name==='AbortError') return; files.forEach(([name,id])=>{const a=document.createElement('a');a.download=name;a.href=$(id).toDataURL('image/png');a.click();}); $('status').textContent='浏览器不支持文件夹选择，已改为逐张下载'; }
     };
     $('zipAll').onclick = async () => {
-      const files=[['01-鐪熷疄鏁堟灉鍥?png','mockup'],['02-鐧藉簳浜у搧鍥?png','white'],['03-鑳屾櫙灞曠ず鍥?png','scene'],['04-姝ｄ晶缁勫悎鍥?png','combo'],['05-鐭鎯?png','short'],['06-璇︽儏鍥?png','detail']];
+      const files=[['01-真实效果图.png','mockup'],['02-白底产品图.png','white'],['03-背景展示图.png','scene'],['04-正侧组合图.png','combo'],['05-短详情.png','short'],['06-详情图.png','detail']];
       const zip = new JSZip();
       for(const [name,id] of files){ const blob = await new Promise(ok => $(id).toBlob(ok,'image/png')); zip.file(name, blob); }
       const content = await zip.generateAsync({type:'blob'});
       const a = document.createElement('a'); a.href = URL.createObjectURL(content); a.download = 'mockup-result.zip'; a.click();
-      $('status').textContent = '宸叉墦鍖?ZIP 寮€濮嬩笅杞?;
+      $('status').textContent = '已打包 ZIP 开始下载';
     };
     $('tb').onclick=()=>{version='taobao';$('tb').classList.add('on');$('dd').classList.remove('on');drawAll();};$('dd').onclick=()=>{version='duoduo';$('dd').classList.add('on');$('tb').classList.remove('on');drawAll();};$('reset').onclick=init;
     $('moldClear').onclick=()=>setMold('clear');$('moldCarbon').onclick=()=>setMold('carbon');
-    $('usePin').onclick=()=>{ const u=$('pinUrl').value.trim(); if(!u){$('status').textContent='璇峰厛绮樿创鍥剧墖鍦板潃';return;} const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>{assets.art=img;drawAll();$('status').textContent='宸插簲鐢ㄥ浘鐗?;}; img.onerror=()=>{$('status').textContent='鍔犺浇澶辫触';}; img.src='https://images.weserv.nl/?url='+encodeURIComponent(u.replace(/^https?:\/\//,'')); }
-    async function init(){ mold='clear';$('moldClear').classList.add('on');$('moldCarbon').classList.remove('on'); try { $('status').textContent='姝ｅ湪杞藉叆榛樿绱犳潗鈥?; await Promise.all(Object.entries(defaults).map(async ([k,v])=>{ assets[k]=await load(v+'?v=37'); })); drawAll(); } catch(e) { $('status').textContent=e.message; } }
+    $('usePin').onclick=()=>{ const u=$('pinUrl').value.trim(); if(!u){$('status').textContent='请先粘贴图片地址';return;} const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>{assets.art=img;drawAll();$('status').textContent='已应用图片';}; img.onerror=()=>{$('status').textContent='加载失败';}; img.src='https://images.weserv.nl/?url='+encodeURIComponent(u.replace(/^https?:\/\//,'')); }
+    async function init(){ mold='clear';$('moldClear').classList.add('on');$('moldCarbon').classList.remove('on'); try { $('status').textContent='正在载入默认素材…'; await Promise.all(Object.entries(defaults).map(async ([k,v])=>{ assets[k]=await load(v+'?v=37'); })); drawAll(); } catch(e) { $('status').textContent=e.message; } }
     init();
   </script>
 </body></html>
